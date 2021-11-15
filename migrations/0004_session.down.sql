@@ -1,0 +1,2 @@
+DROP INDEX CONCURRENTLY IF EXISTS "session_user_id_idx";
+DROP TABLE IF EXISTS "session";

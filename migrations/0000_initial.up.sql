@@ -1,0 +1,10 @@
+CREATE USER odin WITH
+    CREATEROLE
+    SUPERUSER
+    PASSWORD 'odin';
+
+CREATE DATABASE odin WITH
+    OWNER = odin;
+
+CREATE DATABASE odin_test WITH
+    OWNER = odin;

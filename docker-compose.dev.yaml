@@ -1,0 +1,118 @@
+version: "3"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:13-alpine
+    env_file: ./.env.dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./migrations/0000_initial.up.sql:/docker-entrypoint-initdb.d/init.sql
+      - database:/var/lib/postgres/data
+
+  redis:
+    container_name: redis
+    image: redis:6-alpine
+    env_file: ./.env.dev
+    command:
+      [
+        "redis-server",
+        "--requirepass ${REDIS_PASSWORD}",
+        "--maxmemory ${REDIS_MAXMEMORY}",
+        "--maxmemory-policy ${REDIS_MAXMEMORY_POLICY}",
+      ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - cache:/var/lib/redis/data
+
+  odin-api:
+    build:
+      context: ./
+      dockerfile: ./cmd/api/Dockerfile.dev
+    container_name: odin-api
+    env_file: ./.env.dev
+    depends_on:
+      - postgres
+      - redis
+    links:
+      - postgres:postgres
+      - redis:redis
+    ports:
+      - "1111:1111"
+    volumes:
+      - "./:/app"
+
+  odin-worker:
+    build:
+      context: ./
+      dockerfile: ./cmd/worker/Dockerfile.dev
+    container_name: odin-worker
+    env_file: ./.env.dev
+    depends_on:
+      - postgres
+      - redis
+    links:
+      - postgres:postgres
+      - redis:redis
+    volumes:
+      - "./:/app"
+
+  dev:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: dev
+    stdin_open: true
+    tty: true
+    env_file: ./.env.dev
+    volumes:
+      - "./:/workspace"
+
+  # locust-master:
+  #   container_name: locust-master
+  #   image: locustio/locust:latest
+  #   env_file: ./.env.dev
+  #   command:
+  #     [
+  #       "locust",
+  #       "--locustfile /mnt/locust/locustfile.py",
+  #       "--master",
+  #       "--host ${LOCUST_HOST}",
+  #       "--users ${LOCUST_USERS}",
+  #       "--spawn-rate ${LOCUST_SPAWN_RATE}",
+  #     ]
+  #   depends_on:
+  #     - odin-api
+  #   links:
+  #     - odin-api:odin-api
+  #   ports:
+  #     - "8089:8089"
+  #   volumes:
+  #     - ./scripts/locust.py:/mnt/locust/locustfile.py
+
+  # locust-worker:
+  #   # container_name: locust-worker # Scalable containers cannot have custom names
+  #   image: locustio/locust:latest
+  #   env_file: ./.env.dev
+  #   command:
+  #     [
+  #       "locust",
+  #       "--locustfile /mnt/locust/locustfile.py",
+  #       "--worker",
+  #       "--master-host locust-master"
+  #     ]
+  #   depends_on:
+  #     - locust-master
+  #     - odin-api
+  #   links:
+  #     - locust-master:locust-master
+  #     - odin-api:odin-api
+  #   volumes:
+  #     - ./scripts/locust.py:/mnt/locust/locustfile.py
+  #   deploy:
+  #     replicas: 4
+
+volumes:
+  database:
+  cache:
