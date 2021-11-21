@@ -35,6 +35,6 @@ func internalError(err error) error {
 	case pgx.ErrNoRows.Error():
 		return ErrNoRows().WrapWithDepth(2, err)
 	default:
-		return err
+		return ErrGeneric().WrapWithDepth(2, err)
 	}
 }

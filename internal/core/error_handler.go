@@ -31,13 +31,13 @@ func (self *ErrorHandler) Handle(err error, ctx echo.Context) {
 	if !ok {
 		switch err {
 		case echo.ErrNotFound:
-			exc = internal.ErrNotFound.Cause(err)
+			exc = internal.ExcNotFound.Cause(err)
 		case echo.ErrStatusRequestEntityTooLarge:
-			exc = internal.ErrInvalidRequest.Cause(err)
+			exc = internal.ExcInvalidRequest.Cause(err)
 		case http.ErrHandlerTimeout:
-			exc = internal.ErrRequestTimeout.Cause(err)
+			exc = internal.ExcRequestTimeout.Cause(err)
 		default: // Fallback.
-			exc = internal.ErrServerGeneric.Cause(err)
+			exc = internal.ExcServerGeneric.Cause(err)
 		}
 	}
 

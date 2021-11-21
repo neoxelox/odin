@@ -2,6 +2,8 @@ package internal
 
 import "net/http"
 
+type ContextKey string
+
 const (
 	ASSETS_PATH  = "./assets"
 	FILES_PATH   = ASSETS_PATH + "/files"
@@ -15,21 +17,24 @@ const (
 )
 
 var (
-	// ErrServerGeneric generic server exception.
-	ErrServerGeneric = NewException(http.StatusInternalServerError, "ERR_SERVER_GENERIC")
+	// ExcServerGeneric generic server exception.
+	ExcServerGeneric = NewException(http.StatusInternalServerError, "ERR_SERVER_GENERIC")
 
-	// ErrServerUnavailable server Unavailable exception.
-	ErrServerUnavailable = NewException(http.StatusServiceUnavailable, "ERR_SERVER_UNAVAILABLE")
+	// ExcServerUnavailable server Unavailable exception.
+	ExcServerUnavailable = NewException(http.StatusServiceUnavailable, "ERR_SERVER_UNAVAILABLE")
 
-	// ErrRequestTimeout request timeout exception.
-	ErrRequestTimeout = NewException(http.StatusRequestTimeout, "ERR_REQUEST_TIMEOUT")
+	// ExcRequestTimeout request timeout exception.
+	ExcRequestTimeout = NewException(http.StatusRequestTimeout, "ERR_REQUEST_TIMEOUT")
 
-	// ErrClientGeneric generic client exception.
-	ErrClientGeneric = NewException(http.StatusBadRequest, "ERR_CLIENT_GENERIC")
+	// ExcClientGeneric generic client exception.
+	ExcClientGeneric = NewException(http.StatusBadRequest, "ERR_CLIENT_GENERIC")
 
-	// ErrInvalidRequest invalid request exception.
-	ErrInvalidRequest = NewException(http.StatusBadRequest, "ERR_INVALID_REQUEST")
+	// ExcInvalidRequest invalid request exception.
+	ExcInvalidRequest = NewException(http.StatusBadRequest, "ERR_INVALID_REQUEST")
 
-	// ErrInvalidRequest not found exception.
-	ErrNotFound = NewException(http.StatusNotFound, "ERR_NOT_FOUND")
+	// ExcInvalidRequest not found exception.
+	ExcNotFound = NewException(http.StatusNotFound, "ERR_NOT_FOUND")
+
+	// ExcUnauthorized unauthorized exception.
+	ExcUnauthorized = NewException(http.StatusUnauthorized, "ERR_UNAUTHORIZED")
 )

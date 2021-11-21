@@ -57,15 +57,25 @@ func (self *API) Start() error {
 func (self *API) Close(ctx context.Context) error {
 	self.Logger.Info("Closing api")
 
-	errS := self.Server.Close(ctx)
-	errC := self.Cache.Close(ctx)
-	errD := self.Database.Close(ctx)
-	errO := self.close(ctx)
+	var err error
 
-	if errS != nil || errC != nil || errD != nil {
-		err := errors.CombineErrors(errS, errC)
-		err = errors.CombineErrors(err, errD)
-		err = errors.CombineErrors(err, errO)
+	if errC := self.Server.Close(ctx); errC != nil {
+		err = errors.CombineErrors(err, errC)
+	}
+
+	if errC := self.close(ctx); errC != nil {
+		err = errors.CombineErrors(err, errC)
+	}
+
+	if errC := self.Cache.Close(ctx); errC != nil {
+		err = errors.CombineErrors(err, errC)
+	}
+
+	if errC := self.Database.Close(ctx); errC != nil {
+		err = errors.CombineErrors(err, errC)
+	}
+
+	if err != nil {
 		return ErrAPIGeneric().Wrap(err)
 	}
 

@@ -5,7 +5,6 @@ CREATE TABLE "community" (
     "categories"    VARCHAR(100) ARRAY NOT NULL,
     "pinned_ids"    VARCHAR(20) ARRAY NOT NULL,
     "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    "updated_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     "deleted_at"    TIMESTAMP WITH TIME ZONE NULL
 );
 

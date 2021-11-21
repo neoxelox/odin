@@ -6,10 +6,10 @@ import (
 
 type PostFileResponse struct {
 	class.Payload
-	FileURL string `json:"file_url"`
+	URL string `json:"url"`
 }
 
 type GetFileRequest struct {
 	class.Payload
-	FileName string `param:"file_name" validate:"required"`
+	Name string `param:"name" validate:"required"`
 }

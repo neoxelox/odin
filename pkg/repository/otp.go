@@ -9,7 +9,6 @@ import (
 	"github.com/neoxelox/odin/internal/core"
 	"github.com/neoxelox/odin/internal/database"
 	"github.com/neoxelox/odin/pkg/model"
-	"github.com/rs/xid"
 )
 
 const OTP_TABLE = "otp"
@@ -22,26 +21,20 @@ type OTPRepository struct {
 
 func NewOTPRepository(configuration internal.Configuration, logger core.Logger, database database.Database) *OTPRepository {
 	return &OTPRepository{
-		Repository: *class.NewRepository(OTP_TABLE, configuration, logger, database),
+		Repository: *class.NewRepository(configuration, logger, database),
 	}
-}
-
-func (self *OTPRepository) Transaction(ctx context.Context, fn func(*OTPRepository) error) error {
-	return self.Database.Transaction(ctx, func(db *database.Database) error {
-		return fn(&OTPRepository{
-			Repository: *class.NewRepository(self.Table, self.Configuration, self.Logger, *db),
-		})
-	})
 }
 
 func (self *OTPRepository) Create(ctx context.Context, otp model.OTP) (*model.OTP, error) {
 	var o model.OTP
 
-	query := fmt.Sprintf(`INSERT INTO "%s" ("id", "asset", "code", "attempts", "created_at", "updated_at", "deleted_at")
-						  VALUES ($1, $2, $3, $4, $5, $6, $7)
+	query := fmt.Sprintf(`INSERT INTO "%s"
+						  ("id", "asset", "type", "code", "attempts", "expires_at")
+						  VALUES ($1, $2, $3, $4, $5, $6)
 						  RETURNING *;`, OTP_TABLE)
 
-	err := self.Database.Query(ctx, query, otp.ID, otp.Asset, otp.Code, otp.Attempts, otp.CreatedAt, otp.UpdatedAt, otp.DeletedAt).Scan(&o)
+	err := self.Database.Query(
+		ctx, query, otp.ID, otp.Asset, otp.Type, otp.Code, otp.Attempts, otp.ExpiresAt).Scan(&o)
 	if err != nil {
 		return nil, ErrOTPGeneric().Wrap(err)
 	}
@@ -49,16 +42,69 @@ func (self *OTPRepository) Create(ctx context.Context, otp model.OTP) (*model.OT
 	return &o, nil
 }
 
-func (self *OTPRepository) Get(ctx context.Context, id xid.ID) (*model.OTP, error) {
+func (self *OTPRepository) GetByID(ctx context.Context, id string) (*model.OTP, error) {
 	var o model.OTP
 
 	query := fmt.Sprintf(`SELECT * FROM "%s"
-						  WHERE id = $1;`, OTP_TABLE)
+						  WHERE "id" = $1;`, OTP_TABLE)
 
 	err := self.Database.Query(ctx, query, id).Scan(&o)
-	if err != nil {
+	switch {
+	case err == nil:
+		return &o, nil
+	case database.ErrNoRows().Is(err):
+		return nil, nil
+	default:
 		return nil, ErrOTPGeneric().Wrap(err)
 	}
+}
 
-	return &o, nil
+func (self *OTPRepository) GetByAsset(ctx context.Context, asset string) (*model.OTP, error) {
+	var o model.OTP
+
+	query := fmt.Sprintf(`SELECT * FROM "%s"
+						  WHERE "asset" = $1;`, OTP_TABLE)
+
+	err := self.Database.Query(ctx, query, asset).Scan(&o)
+	switch {
+	case err == nil:
+		return &o, nil
+	case database.ErrNoRows().Is(err):
+		return nil, nil
+	default:
+		return nil, ErrOTPGeneric().Wrap(err)
+	}
+}
+
+func (self *OTPRepository) UpdateAttempts(ctx context.Context, id string, attempts int) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "attempts" = $1
+						  WHERE "id" = $2;`, OTP_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, attempts, id)
+	if err != nil {
+		return ErrOTPGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrOTPGeneric()
+	}
+
+	return nil
+}
+
+func (self *OTPRepository) Delete(ctx context.Context, id string) error {
+	query := fmt.Sprintf(`DELETE FROM "%s"
+						  WHERE "id" = $1;`, OTP_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, id)
+	if err != nil {
+		return ErrOTPGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrOTPGeneric()
+	}
+
+	return nil
 }

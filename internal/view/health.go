@@ -29,12 +29,12 @@ func (self *HealthView) GetHealth() (interface{}, func(ctx echo.Context) error) 
 	return nil, func(ctx echo.Context) error {
 		err := self.database.Health(ctx.Request().Context())
 		if err != nil {
-			return internal.ErrServerUnavailable.Cause(err)
+			return internal.ExcServerUnavailable.Cause(err)
 		}
 
 		err = self.cache.Health(ctx.Request().Context())
 		if err != nil {
-			return internal.ErrServerUnavailable.Cause(err)
+			return internal.ExcServerUnavailable.Cause(err)
 		}
 
 		return ctx.String(http.StatusOK, "OK\n")

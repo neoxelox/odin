@@ -10,26 +10,26 @@ import (
 
 type User struct {
 	class.Model
+	ID            string     `db:"id"`
 	Phone         string     `db:"phone"`
 	Name          string     `db:"name"`
 	Email         *string    `db:"email"`
 	Picture       *string    `db:"picture"`
 	Birthday      *time.Time `db:"birthday"`
 	Language      string     `db:"language"`
-	LastSessionID *xid.ID    `db:"last_session_id"`
+	LastSessionID *string    `db:"last_session_id"`
 	IsBanned      bool       `db:"is_banned"`
+	CreatedAt     time.Time  `db:"created_at"`
+	DeletedAt     *time.Time `db:"deleted_at"`
 }
 
 func NewUser() *User {
 	now := time.Now()
 
 	return &User{
-		Model: class.Model{
-			ID:        xid.New(),
-			CreatedAt: now,
-			UpdatedAt: now,
-		},
-		Language: "ES",
+		ID:        xid.New().String(),
+		CreatedAt: now,
+		Language:  "ES",
 	}
 }
 

@@ -41,6 +41,7 @@ type Configuration struct {
 	TwilioApiKey     string
 	TwilioApiSecret  string
 	TwilioFromPhone  string
+	TwilioOriginator string
 	TwilioRegion     string
 	TwilioEdge       string
 
@@ -80,6 +81,7 @@ func NewConfiguration(override *Configuration) *Configuration {
 		TwilioApiKey:     utility.GetEnvAsString("ODIN_TWILIO_API_KEY", "fake"),
 		TwilioApiSecret:  utility.GetEnvAsString("ODIN_TWILIO_API_SECRET", "fake"),
 		TwilioFromPhone:  utility.GetEnvAsString("ODIN_TWILIO_FROM_PHONE", "fake"),
+		TwilioOriginator: utility.GetEnvAsString("ODIN_TWILIO_ORIGINATOR", "Community"),
 		TwilioRegion:     utility.GetEnvAsString("ODIN_TWILIO_REGION", "de1"),
 		TwilioEdge:       utility.GetEnvAsString("ODIN_TWILIO_EDGE", "frankfurt"),
 

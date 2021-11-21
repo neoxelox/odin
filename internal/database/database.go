@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	POSTGRES_DSN = "postgresql://%s:%s@%s:%d/%s?sslmode=%s"
+	POSTGRES_DSN                                = "postgresql://%s:%s@%s:%d/%s?sslmode=%s"
+	CONTEXT_TRANSACTION_KEY internal.ContextKey = "database:tx"
 )
 
 var (
@@ -24,16 +25,10 @@ var (
 	ErrTransaction = internal.NewError("Database transaction failed")
 )
 
-type Connection interface {
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
-}
-
 type Database struct {
 	configuration internal.Configuration
 	logger        core.Logger
 	pool          *pgxpool.Pool
-	connection    Connection
 }
 
 func New(ctx context.Context, retries int, configuration internal.Configuration, logger core.Logger) (*Database, error) {
@@ -100,7 +95,6 @@ func New(ctx context.Context, retries int, configuration internal.Configuration,
 					configuration: configuration,
 					logger:        logger,
 					pool:          pool,
-					connection:    pool,
 				}, nil
 			}
 		}
@@ -162,7 +156,16 @@ type Scan struct {
 func (self *Database) Query(ctx context.Context, sql string, args ...interface{}) Scan {
 	return Scan{
 		Scan: func(dest ...interface{}) error {
-			rows, err := self.connection.Query(ctx, sql, args...)
+			var rows pgx.Rows
+			var err error
+
+			if ctx.Value(CONTEXT_TRANSACTION_KEY) != nil {
+				transaction, _ := ctx.Value(CONTEXT_TRANSACTION_KEY).(pgx.Tx)
+				rows, err = transaction.Query(ctx, sql, args...)
+			} else {
+				rows, err = self.pool.Query(ctx, sql, args...)
+			}
+
 			if err != nil {
 				return internalError(err)
 			}
@@ -181,7 +184,16 @@ func (self *Database) Query(ctx context.Context, sql string, args ...interface{}
 }
 
 func (self *Database) Exec(ctx context.Context, sql string, args ...interface{}) (int, error) {
-	command, err := self.connection.Exec(ctx, sql, args...)
+	var command pgconn.CommandTag
+	var err error
+
+	if ctx.Value(CONTEXT_TRANSACTION_KEY) != nil {
+		transaction, _ := ctx.Value(CONTEXT_TRANSACTION_KEY).(pgx.Tx)
+		command, err = transaction.Exec(ctx, sql, args...)
+	} else {
+		command, err = self.pool.Exec(ctx, sql, args...)
+	}
+
 	if err != nil {
 		return 0, internalError(err)
 	}
@@ -193,7 +205,15 @@ func (self *Database) Exec(ctx context.Context, sql string, args ...interface{})
 	return int(command.RowsAffected()), nil
 }
 
-func (self *Database) Transaction(ctx context.Context, fn func(*Database) error) error {
+func (self *Database) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	if ctx.Value(CONTEXT_TRANSACTION_KEY) != nil {
+		err := fn(ctx)
+		if err != nil {
+			return ErrTransaction().WrapWithDepth(1, err)
+		}
+		return nil
+	}
+
 	transaction, err := self.pool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel:   pgx.Serializable,
 		AccessMode: pgx.ReadWrite,
@@ -213,12 +233,7 @@ func (self *Database) Transaction(ctx context.Context, fn func(*Database) error)
 		}
 	}()
 
-	err = fn(&Database{
-		configuration: self.configuration,
-		logger:        self.logger,
-		pool:          self.pool,
-		connection:    transaction,
-	})
+	err = fn(context.WithValue(ctx, CONTEXT_TRANSACTION_KEY, transaction))
 	if err != nil {
 		errR := transaction.Rollback(ctx)
 		err := errors.CombineErrors(err, errR)

@@ -203,11 +203,14 @@ func (self Logger) Error(i ...interface{}) {
 		self.logger.Error().Msg(fmt.Sprint(i...))
 	} else {
 		if i != nil {
-			err, ok := i[0].(*internal.Error)
-			if !ok {
-				fmt.Printf("%+v\n", i...)
+			if len(i) == 1 {
+				err, _ := i[0].(error)
+				if ierr, ok := i[0].(*internal.Error); ok {
+					err = ierr.Unwrap()
+				}
+				fmt.Printf("%+v\n", err)
 			} else {
-				fmt.Printf("%+v\n", err.Outer())
+				fmt.Printf("%+v\n", i...)
 			}
 		}
 	}

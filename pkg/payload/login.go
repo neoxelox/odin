@@ -13,12 +13,11 @@ type PostLoginStartRequest struct {
 func (self *PostLoginStartRequest) Process() error {
 	ph, err := phonenumbers.Parse(self.Phone, "ES")
 	if err != nil {
-		return ErrInvalidPhone.Cause(err)
+		return ExcInvalidPhone.Cause(err)
 	}
 
-	ok := phonenumbers.IsValidNumber(ph)
-	if !ok {
-		return ErrInvalidPhone
+	if !phonenumbers.IsValidNumber(ph) {
+		return ExcInvalidPhone
 	}
 
 	self.Phone = phonenumbers.Format(ph, phonenumbers.E164)
@@ -28,15 +27,18 @@ func (self *PostLoginStartRequest) Process() error {
 
 type PostLoginStartResponse struct {
 	class.Payload
+	ID string `json:"id"`
 }
 
 type PostLoginEndRequest struct {
 	class.Payload
-	Code string `json:"code"`
+	ID   string `json:"id" validate:"required"`
+	Code string `json:"code" validate:"required"`
 }
 
 type PostLoginEndResponse struct {
 	class.Payload
-	AccessToken string `json:"access_token"`
-	User        *User  `json:"user"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	User         *User  `json:"user"`
 }

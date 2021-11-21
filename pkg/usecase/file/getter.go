@@ -23,7 +23,7 @@ func (self *GetterUsecase) Get(ctx context.Context, fileName string) (string, er
 	filePath := fmt.Sprintf("%s/%s", internal.FILES_PATH, fileName)
 
 	if self.Configuration.Environment == internal.Environment.PRODUCTION {
-		return "", ErrFileGeneric()
+		return "", ErrGeneric()
 	}
 
 	return filePath, nil

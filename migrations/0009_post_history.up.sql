@@ -6,9 +6,7 @@ CREATE TABLE "post_history" (
     "state"         VARCHAR(100) NULL,
     "widgets"       JSONB NOT NULL,
     "media"         JSONB NOT NULL,
-    "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    "updated_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    "deleted_at"    TIMESTAMP WITH TIME ZONE NULL
+    "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX CONCURRENTLY "post_history_post_id_idx" ON "post_history" ("post_id");

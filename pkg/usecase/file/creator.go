@@ -24,7 +24,7 @@ func (self *CreatorUsecase) Create(ctx context.Context, fileName string) (string
 	fileURL := fmt.Sprintf("%s/v1/file/%s", fileOrigin, fileName)
 
 	if self.Configuration.Environment == internal.Environment.PRODUCTION {
-		return "", ErrFileGeneric()
+		return "", ErrGeneric()
 	}
 
 	return fileURL, nil

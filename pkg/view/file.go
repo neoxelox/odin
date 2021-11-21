@@ -32,15 +32,16 @@ func NewFileView(configuration internal.Configuration, logger core.Logger, fileC
 }
 
 func (self *FileView) Post() (interface{}, func(ctx echo.Context) error) {
+	response := &payload.PostFileResponse{}
 	return nil, func(ctx echo.Context) error {
 		file, err := ctx.FormFile("file")
 		if err != nil {
-			return internal.ErrClientGeneric.Cause(err)
+			return internal.ExcClientGeneric.Cause(err)
 		}
 
 		src, err := file.Open()
 		if err != nil {
-			return internal.ErrClientGeneric.Cause(err)
+			return internal.ExcClientGeneric.Cause(err)
 		}
 		defer src.Close()
 
@@ -49,22 +50,20 @@ func (self *FileView) Post() (interface{}, func(ctx echo.Context) error) {
 
 		dst, err := os.Create(filePath)
 		if err != nil {
-			return internal.ErrServerGeneric.Cause(err)
+			return internal.ExcServerGeneric.Cause(err)
 		}
 		defer dst.Close()
 
 		if _, err = io.Copy(dst, src); err != nil {
-			return internal.ErrServerGeneric.Cause(err)
+			return internal.ExcServerGeneric.Cause(err)
 		}
 
 		fileURL, err := self.fileCreator.Create(ctx.Request().Context(), fileName)
 		if err != nil {
-			return internal.ErrServerGeneric.Cause(err)
+			return internal.ExcServerGeneric.Cause(err)
 		}
 
-		response := &payload.PostFileResponse{
-			FileURL: fileURL,
-		}
+		response.URL = fileURL
 
 		return ctx.JSON(http.StatusOK, response)
 	}
@@ -73,9 +72,9 @@ func (self *FileView) Post() (interface{}, func(ctx echo.Context) error) {
 func (self *FileView) Get() (*payload.GetFileRequest, func(ctx echo.Context) error) {
 	request := &payload.GetFileRequest{}
 	return request, func(ctx echo.Context) error {
-		filePath, err := self.fileGetter.Get(ctx.Request().Context(), request.FileName)
+		filePath, err := self.fileGetter.Get(ctx.Request().Context(), request.Name)
 		if err != nil {
-			return internal.ErrServerGeneric.Cause(err)
+			return internal.ExcServerGeneric.Cause(err)
 		}
 
 		return ctx.File(filePath)

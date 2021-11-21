@@ -7,9 +7,7 @@ CREATE TABLE "post" (
     "priority"          INTEGER NULL,
     "recipient_ids"     VARCHAR(20) ARRAY NULL,
     "voter_ids"         VARCHAR(20) ARRAY NOT NULL,
-    "created_at"        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    "updated_at"        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    "deleted_at"        TIMESTAMP WITH TIME ZONE NULL
+    "created_at"        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX CONCURRENTLY "post_thread_id_idx" ON "post" ("thread_id");

@@ -7,5 +7,5 @@ import (
 )
 
 var (
-	ErrInvalidPhone = internal.NewException(http.StatusBadRequest, "ERR_INVALID_PHONE")
+	ExcInvalidPhone = internal.NewException(http.StatusBadRequest, "ERR_INVALID_PHONE")
 )

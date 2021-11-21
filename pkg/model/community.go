@@ -10,21 +10,21 @@ import (
 
 type Community struct {
 	class.Model
-	Address    string   `db:"address"`
-	Name       string   `db:"name"`
-	Categories []string `db:"categories"`
-	PinnedIDs  []xid.ID `db:"pinned_ids"`
+	ID         string     `db:"id"`
+	Address    string     `db:"address"`
+	Name       string     `db:"name"`
+	Categories []string   `db:"categories"`
+	PinnedIDs  []string   `db:"pinned_ids"`
+	CreatedAt  time.Time  `db:"created_at"`
+	DeletedAt  *time.Time `db:"deleted_at"`
 }
 
 func NewCommunity() *Community {
 	now := time.Now()
 
 	return &Community{
-		Model: class.Model{
-			ID:        xid.New(),
-			CreatedAt: now,
-			UpdatedAt: now,
-		},
+		ID:        xid.New().String(),
+		CreatedAt: now,
 	}
 }
 

@@ -27,8 +27,6 @@ func (self *LoggerMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		req := ctx.Request()
-		res := ctx.Response()
-
 		start := time.Now()
 
 		if err := next(ctx); err != nil {
@@ -36,6 +34,7 @@ func (self *LoggerMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		stop := time.Now()
+		res := ctx.Response()
 
 		self.Logger.Logger().Info().
 			Str("method", req.Method).

@@ -5,49 +5,58 @@ import "github.com/cockroachdb/errors"
 type Error struct {
 	message string
 	inner   error
-	outer   error
 }
 
 func NewError(message string) func() *Error {
 	return func() *Error {
 		return &Error{
 			message: message,
-			outer:   errors.NewWithDepth(1, message),
+			inner:   errors.NewWithDepth(1, message),
 		}
 	}
 }
 
 func (self *Error) Wrap(err error) *Error {
-	self.inner = err
-	self.outer = errors.WrapWithDepth(1, self.inner, self.message)
+	self.inner = errors.WrapWithDepth(1, err, self.message)
 	return self
 }
 
 func (self *Error) WrapWithDepth(depth int, err error) *Error {
-	self.inner = err
-	self.outer = errors.WrapWithDepth(depth+1, self.inner, self.message)
+	self.inner = errors.WrapWithDepth(depth+1, err, self.message)
 	return self
 }
 
-func (self Error) Outer() error {
-	return self.outer
+func (self *Error) As(err error) *Error {
+	if other, ok := err.(*Error); ok {
+		self.message = other.message
+	} else {
+		self.message = err.Error()
+	}
+	self.inner = errors.WrapWithDepth(1, err, self.message)
+	return self
 }
 
-func (self Error) Inner() error {
-	return self.inner
+func (self *Error) AsWithDepth(depth int, err error) *Error {
+	if other, ok := err.(*Error); ok {
+		self.message = other.message
+	} else {
+		self.message = err.Error()
+	}
+	self.inner = errors.WrapWithDepth(depth+1, err, self.message)
+	return self
 }
 
 func (self Error) Error() string {
-	return self.Outer().Error()
+	return self.Unwrap().Error()
 }
 
 func (self Error) Unwrap() error {
-	return self.Inner()
+	return self.inner
 }
 
 func (self Error) Is(err error) bool {
-	if outer, ok := err.(*Error); ok {
-		return self.message == outer.message
+	if other, ok := err.(*Error); ok {
+		return self.message == other.message
 	}
 
 	return false

@@ -30,12 +30,12 @@ func (self *View) Handle(request interface{}, handler func(ctx echo.Context) err
 		if request != nil {
 			err := ctx.Bind(request)
 			if err != nil {
-				return internal.ErrInvalidRequest.Cause(err)
+				return internal.ExcInvalidRequest.Cause(err)
 			}
 
 			err = ctx.Validate(request)
 			if err != nil {
-				return internal.ErrInvalidRequest.Cause(err)
+				return internal.ExcInvalidRequest.Cause(err)
 			}
 
 			v, ok := request.(process)

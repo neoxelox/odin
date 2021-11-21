@@ -10,24 +10,26 @@ import (
 
 type Session struct {
 	class.Model
-	UserID   xid.ID          `db:"user_id"`
-	Metadata SessionMetadata `db:"metadata"`
+	ID         string          `db:"id"`
+	UserID     string          `db:"user_id"`
+	Metadata   SessionMetadata `db:"metadata"`
+	CreatedAt  time.Time       `db:"created_at"`
+	LastSeenAt time.Time       `db:"last_seen_at"`
 }
 
 type SessionMetadata struct {
-	IP     string
-	Device string
+	IP         string
+	Device     string
+	ApiVersion string
 }
 
 func NewSession() *Session {
 	now := time.Now()
 
 	return &Session{
-		Model: class.Model{
-			ID:        xid.New(),
-			CreatedAt: now,
-			UpdatedAt: now,
-		},
+		ID:         xid.New().String(),
+		CreatedAt:  now,
+		LastSeenAt: now,
 	}
 }
 
