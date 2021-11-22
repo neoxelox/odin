@@ -3,7 +3,7 @@ package otp
 import "github.com/neoxelox/odin/internal"
 
 const (
-	OTP_MESSAGE = `Tu código de verificación es: %s. Por favor, nunca compartas este código con nadie.`
+	OTP_MESSAGE = `Tu código de verificación para Community es: %s. Por favor, nunca compartas este código con nadie.`
 )
 
 var (

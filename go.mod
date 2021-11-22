@@ -3,6 +3,8 @@ module github.com/neoxelox/odin
 go 1.17
 
 require (
+	github.com/aodin/date v0.0.0-20160219192542-c5f6146fc644
+	github.com/badoux/checkmail v1.2.1
 	github.com/cockroachdb/errors v1.8.6
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-redis/cache/v8 v8.4.3

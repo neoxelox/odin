@@ -34,7 +34,7 @@ func (self *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(ctx)
 		}
 
-		user, err := self.authVerifier.Verify(ctx.Request().Context(), ctx.Request().Header.Get(AUTH_HEADER), model.SessionMetadata{
+		session, user, err := self.authVerifier.Verify(ctx.Request().Context(), ctx.Request().Header.Get(AUTH_HEADER), model.SessionMetadata{
 			IP:         ctx.RealIP(),
 			Device:     ctx.Request().Host,
 			ApiVersion: strings.Split(ctx.Path(), "/")[1],
@@ -42,6 +42,7 @@ func (self *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 
 		switch {
 		case err == nil:
+			ctx.Set(string(model.CONTEXT_SESSION_KEY), session)
 			ctx.Set(string(model.CONTEXT_USER_KEY), user)
 			return next(ctx)
 		case auth.ErrExpiredAccessToken().Is(err), auth.ErrInvalidAccessToken().Is(err),

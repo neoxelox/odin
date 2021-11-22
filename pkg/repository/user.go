@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aodin/date"
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/class"
 	"github.com/neoxelox/odin/internal/core"
@@ -90,6 +91,23 @@ func (self *UserRepository) UpdateSession(ctx context.Context, id string, sessio
 						  WHERE "id" = $2;`, USER_TABLE)
 
 	affected, err := self.Database.Exec(ctx, query, sessionID, id)
+	if err != nil {
+		return ErrUserGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrUserGeneric()
+	}
+
+	return nil
+}
+
+func (self *UserRepository) UpdateProfile(ctx context.Context, id string, name string, picture string, birthday date.Date) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "name" = $1, "picture" = $2, "birthday" = $3
+						  WHERE "id" = $4;`, USER_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, name, picture, birthday, id)
 	if err != nil {
 		return ErrUserGeneric().Wrap(err)
 	}

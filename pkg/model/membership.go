@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/neoxelox/odin/internal/class"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/rs/xid"
 )
 
@@ -44,4 +45,16 @@ func NewMembership() *Membership {
 
 func (self Membership) String() string {
 	return fmt.Sprintf("<%s <-> %s: %s>", self.UserID, self.CommunityID, self.ID)
+}
+
+func (self *Membership) Copy() *Membership {
+	return &Membership{
+		ID:          *utility.CopyString(&self.ID),
+		UserID:      *utility.CopyString(&self.UserID),
+		CommunityID: *utility.CopyString(&self.CommunityID),
+		Door:        *utility.CopyString(&self.Door),
+		Role:        *utility.CopyString(&self.Role),
+		CreatedAt:   *utility.CopyTime(&self.CreatedAt),
+		DeletedAt:   utility.CopyTime(self.DeletedAt),
+	}
 }

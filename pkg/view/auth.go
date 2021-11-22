@@ -9,26 +9,26 @@ import (
 	"github.com/neoxelox/odin/internal/core"
 	"github.com/neoxelox/odin/pkg/model"
 	"github.com/neoxelox/odin/pkg/payload"
-	"github.com/neoxelox/odin/pkg/usecase/login"
+	"github.com/neoxelox/odin/pkg/usecase/auth"
 	"github.com/neoxelox/odin/pkg/usecase/otp"
 )
 
-type LoginView struct {
+type AuthView struct {
 	class.View
-	otpCreator     otp.CreatorUsecase
-	loginProcessor login.ProcessorUsecase
+	otpCreator otp.CreatorUsecase
+	authLogger auth.LoggerUsecase
 }
 
-func NewLoginView(configuration internal.Configuration, logger core.Logger, otpCreator otp.CreatorUsecase,
-	loginProcessor login.ProcessorUsecase) *LoginView {
-	return &LoginView{
-		View:           *class.NewView(configuration, logger),
-		otpCreator:     otpCreator,
-		loginProcessor: loginProcessor,
+func NewAuthView(configuration internal.Configuration, logger core.Logger, otpCreator otp.CreatorUsecase,
+	authLogger auth.LoggerUsecase) *AuthView {
+	return &AuthView{
+		View:       *class.NewView(configuration, logger),
+		otpCreator: otpCreator,
+		authLogger: authLogger,
 	}
 }
 
-func (self *LoginView) PostStart() (*payload.PostLoginStartRequest, func(ctx echo.Context) error) {
+func (self *AuthView) LoginStart() (*payload.PostLoginStartRequest, func(ctx echo.Context) error) {
 	request := &payload.PostLoginStartRequest{}
 	response := &payload.PostLoginStartResponse{}
 	return request, func(ctx echo.Context) error {
@@ -45,11 +45,11 @@ func (self *LoginView) PostStart() (*payload.PostLoginStartRequest, func(ctx ech
 	}
 }
 
-func (self *LoginView) PostEnd() (*payload.PostLoginEndRequest, func(ctx echo.Context) error) {
+func (self *AuthView) LoginEnd() (*payload.PostLoginEndRequest, func(ctx echo.Context) error) {
 	request := &payload.PostLoginEndRequest{}
 	response := &payload.PostLoginEndResponse{}
 	return request, func(ctx echo.Context) error {
-		accessToken, user, err := self.loginProcessor.Process(ctx.Request().Context(), request.ID, request.Code, model.SessionMetadata{
+		accessToken, user, err := self.authLogger.Login(ctx.Request().Context(), request.ID, request.Code, model.SessionMetadata{
 			IP:         ctx.RealIP(),
 			Device:     ctx.Request().Host,
 			ApiVersion: "v1",

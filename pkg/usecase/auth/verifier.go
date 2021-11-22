@@ -31,54 +31,54 @@ func NewVerifierUsecase(configuration internal.Configuration, logger core.Logger
 	}
 }
 
-func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, metadata model.SessionMetadata) (*model.User, error) {
+func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, metadata model.SessionMetadata) (*model.Session, *model.User, error) {
 	decoded := &model.AccessToken{}
 
 	err := self.codifier.Decrypt(accessToken, self.key).Scan(&decoded.Private, &decoded.Public)
 	if err != nil {
-		return nil, ErrTamperedAccessToken().Wrap(err)
+		return nil, nil, ErrTamperedAccessToken().Wrap(err)
 	}
 
 	if time.Now().After(decoded.Private.ExpiresAt) {
-		return nil, ErrExpiredAccessToken()
+		return nil, nil, ErrExpiredAccessToken()
 	}
 
 	if metadata.ApiVersion != decoded.Public.ApiVersion {
-		return nil, ErrInvalidAccessToken()
+		return nil, nil, ErrInvalidAccessToken()
 	}
 
 	session, err := self.sessionRepository.GetByID(ctx, decoded.Private.SessionID)
 	if err != nil {
-		return nil, ErrGeneric().Wrap(err)
+		return nil, nil, ErrGeneric().Wrap(err)
 	}
 
 	if session == nil {
-		return nil, ErrInvalidAccessToken()
+		return nil, nil, ErrInvalidAccessToken()
 	}
 
 	user, err := self.userRepository.GetByID(ctx, session.UserID)
 	if err != nil {
-		return nil, ErrGeneric().Wrap(err)
+		return nil, nil, ErrGeneric().Wrap(err)
 	}
 
 	if user == nil {
-		return nil, ErrInvalidAccessToken()
+		return nil, nil, ErrInvalidAccessToken()
 	}
 
 	if *user.LastSessionID != session.ID {
-		return nil, ErrInvalidAccessToken()
+		return nil, nil, ErrInvalidAccessToken()
 	}
 
 	if user.IsBanned {
-		return nil, ErrUserBanned()
+		return nil, nil, ErrUserBanned()
 	}
 
 	session.LastSeenAt = time.Now()
 
 	err = self.sessionRepository.UpdateLastSeen(ctx, session.ID, session.LastSeenAt)
 	if err != nil {
-		return nil, ErrGeneric().Wrap(err)
+		return nil, nil, ErrGeneric().Wrap(err)
 	}
 
-	return user, nil
+	return session, user, nil
 }

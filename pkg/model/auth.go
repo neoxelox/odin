@@ -6,10 +6,12 @@ import (
 
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/class"
+	"github.com/neoxelox/odin/internal/utility"
 )
 
 const (
 	ACCESS_TOKEN_EXPIRATION                     = time.Duration(24*365) * time.Hour
+	CONTEXT_SESSION_KEY     internal.ContextKey = "auth:session"
 	CONTEXT_USER_KEY        internal.ContextKey = "auth:user"
 )
 
@@ -47,4 +49,17 @@ func NewAccessToken() *AccessToken {
 
 func (self AccessToken) String() string {
 	return fmt.Sprintf("<%s: %s>", self.Public.ApiVersion, self.Private.SessionID)
+}
+
+func (self *AccessToken) Copy() *AccessToken {
+	return &AccessToken{
+		Private: AccessTokenPrivate{
+			SessionID: *utility.CopyString(&self.Private.SessionID),
+			CreatedAt: *utility.CopyTime(&self.Private.CreatedAt),
+			ExpiresAt: *utility.CopyTime(&self.Private.ExpiresAt),
+		},
+		Public: AccessTokenPublic{
+			ApiVersion: *utility.CopyString(&self.Public.ApiVersion),
+		},
+	}
 }

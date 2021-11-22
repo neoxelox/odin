@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/neoxelox/odin/internal/class"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/rs/xid"
 )
 
@@ -67,6 +68,20 @@ func (self Post) String() string {
 	return fmt.Sprintf("<%s: %s>", self.Type, self.ID)
 }
 
+func (self *Post) Copy() *Post {
+	return &Post{
+		ID:            *utility.CopyString(&self.ID),
+		ThreadID:      utility.CopyString(self.ThreadID),
+		CreatorID:     *utility.CopyString(&self.CreatorID),
+		LastHistoryID: utility.CopyString(self.LastHistoryID),
+		Type:          *utility.CopyString(&self.Type),
+		Priority:      utility.CopyInt(self.Priority),
+		RecipientIDs:  utility.CopyStringSlice(self.RecipientIDs),
+		VoterIDs:      *utility.CopyStringSlice(&self.VoterIDs),
+		CreatedAt:     *utility.CopyTime(&self.CreatedAt),
+	}
+}
+
 type PostHistory struct {
 	class.Model
 	ID         string      `db:"id"`
@@ -90,4 +105,23 @@ func NewPostHistory() *PostHistory {
 
 func (self PostHistory) String() string {
 	return fmt.Sprintf("<%s: %s>", self.Message, self.ID)
+}
+
+func (self *PostHistory) Copy() *PostHistory {
+	return &PostHistory{
+		ID:         *utility.CopyString(&self.ID),
+		PostID:     *utility.CopyString(&self.PostID),
+		Message:    *utility.CopyString(&self.Message),
+		Categories: *utility.CopyStringSlice(&self.Categories),
+		State:      utility.CopyString(self.State),
+		Widgets: PostWidgets{
+			Poll: utility.CopyStringSliceMap(self.Widgets.Poll),
+		},
+		Media: PostMedia{
+			Pictures: utility.CopyStringSlice(self.Media.Pictures),
+			Videos:   utility.CopyStringSlice(self.Media.Videos),
+			Audios:   utility.CopyStringSlice(self.Media.Audios),
+		},
+		CreatedAt: *utility.CopyTime(&self.CreatedAt),
+	}
 }

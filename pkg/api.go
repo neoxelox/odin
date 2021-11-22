@@ -25,7 +25,6 @@ import (
 	"github.com/neoxelox/odin/pkg/service"
 	"github.com/neoxelox/odin/pkg/usecase/auth"
 	"github.com/neoxelox/odin/pkg/usecase/file"
-	"github.com/neoxelox/odin/pkg/usecase/login"
 	"github.com/neoxelox/odin/pkg/usecase/otp"
 	"github.com/neoxelox/odin/pkg/usecase/session"
 	"github.com/neoxelox/odin/pkg/usecase/user"
@@ -121,6 +120,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	/* SERVICES */
 
 	smsService := service.NewSMSService(configuration, logger)
+	emailService := service.NewEmailService(configuration, logger)
 
 	/* REPOSITORIES  */
 
@@ -134,28 +134,28 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	/* USECASES */
 
-	authCreator := auth.NewCreatorUsecase(configuration, logger)
-	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
-
 	fileCreator := file.NewCreatorUsecase(configuration, logger)
 	fileGetter := file.NewGetterUsecase(configuration, logger)
 
-	otpCreator := otp.NewCreatorUsecase(configuration, logger, *database, *otpRepository, *smsService)
+	otpCreator := otp.NewCreatorUsecase(configuration, logger, *database, *otpRepository, *smsService, *emailService)
 	otpVerifier := otp.NewVerifierUsecase(configuration, logger, *otpRepository)
 
 	sessionCreator := session.NewCreatorUsecase(configuration, logger, *database, *sessionRepository, *userRepository)
 
 	userCreator := user.NewCreatorUsecase(configuration, logger, *userRepository)
+	userUpdater := user.NewUpdaterUsecase(configuration, logger, *userRepository)
 
-	loginProcessor := login.NewProcessorUsecase(configuration, logger, *database, *otpVerifier, *userCreator,
+	authCreator := auth.NewCreatorUsecase(configuration, logger)
+	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
+	authLogger := auth.NewLoggerUsecase(configuration, logger, *database, *otpVerifier, *userCreator,
 		*sessionCreator, *authCreator, *otpRepository, *userRepository)
 
 	/* VIEWS */
 
 	healthView := internalView.NewHealthView(configuration, logger, *database, *cache)
 	fileView := view.NewFileView(configuration, logger, *fileCreator, *fileGetter)
-	loginView := view.NewLoginView(configuration, logger, *otpCreator, *loginProcessor)
-	userView := view.NewUserView(configuration, logger)
+	authView := view.NewAuthView(configuration, logger, *otpCreator, *authLogger)
+	userView := view.NewUserView(configuration, logger, *userUpdater)
 
 	/* MIDDLEWARES */
 
@@ -180,8 +180,8 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	// NOT AUTHENTICATED
 
-	api.POST("/login/start", loginView.Handle(loginView.PostStart()))
-	api.POST("/login/end", loginView.Handle(loginView.PostEnd()))
+	api.POST("/login/start", authView.Handle(authView.LoginStart()))
+	api.POST("/login/end", authView.Handle(authView.LoginEnd()))
 
 	apiV1 := api.Group("/v1")
 
@@ -192,7 +192,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.POST("/file", fileView.Handle(fileView.Post()), fileLimitMiddleware)
 	apiV1.GET("/file/:name", fileView.Handle(fileView.Get()), fileLimitMiddleware)
 
-	apiV1.GET("/user/:id", userView.Handle(userView.Get()))
+	apiV1.POST("/user/profile", userView.Handle(userView.PostProfile()))
 
 	return &API{
 		API: *class.NewAPI(

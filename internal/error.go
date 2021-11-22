@@ -46,6 +46,11 @@ func (self *Error) AsWithDepth(depth int, err error) *Error {
 	return self
 }
 
+func (self *Error) With(message string) *Error {
+	self.inner = errors.NewWithDepth(1, self.message+": "+message)
+	return self
+}
+
 func (self Error) Error() string {
 	return self.Unwrap().Error()
 }

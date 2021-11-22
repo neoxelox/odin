@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/neoxelox/odin/internal/class"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/rs/xid"
 )
 
@@ -35,4 +36,18 @@ func NewSession() *Session {
 
 func (self Session) String() string {
 	return fmt.Sprintf("<%s: %s>", self.UserID, self.ID)
+}
+
+func (self *Session) Copy() *Session {
+	return &Session{
+		ID:     *utility.CopyString(&self.ID),
+		UserID: *utility.CopyString(&self.UserID),
+		Metadata: SessionMetadata{
+			IP:         *utility.CopyString(&self.Metadata.IP),
+			Device:     *utility.CopyString(&self.Metadata.Device),
+			ApiVersion: *utility.CopyString(&self.Metadata.ApiVersion),
+		},
+		CreatedAt:  *utility.CopyTime(&self.CreatedAt),
+		LastSeenAt: *utility.CopyTime(&self.LastSeenAt),
+	}
 }

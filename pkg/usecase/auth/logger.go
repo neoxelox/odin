@@ -1,4 +1,4 @@
-package login
+package auth
 
 import (
 	"context"
@@ -9,27 +9,26 @@ import (
 	"github.com/neoxelox/odin/internal/database"
 	"github.com/neoxelox/odin/pkg/model"
 	"github.com/neoxelox/odin/pkg/repository"
-	"github.com/neoxelox/odin/pkg/usecase/auth"
 	"github.com/neoxelox/odin/pkg/usecase/otp"
 	"github.com/neoxelox/odin/pkg/usecase/session"
 	"github.com/neoxelox/odin/pkg/usecase/user"
 )
 
-type ProcessorUsecase struct {
+type LoggerUsecase struct {
 	class.Usecase
 	database       database.Database
 	otpVerifier    otp.VerifierUsecase
 	userCreator    user.CreatorUsecase
 	sessionCreator session.CreatorUsecase
-	authCreator    auth.CreatorUsecase
+	authCreator    CreatorUsecase
 	otpRepository  repository.OTPRepository
 	userRepository repository.UserRepository
 }
 
-func NewProcessorUsecase(configuration internal.Configuration, logger core.Logger, database database.Database,
+func NewLoggerUsecase(configuration internal.Configuration, logger core.Logger, database database.Database,
 	otpVerifier otp.VerifierUsecase, userCreator user.CreatorUsecase, sessionCreator session.CreatorUsecase,
-	authCreator auth.CreatorUsecase, otpRepository repository.OTPRepository, userRepository repository.UserRepository) *ProcessorUsecase {
-	return &ProcessorUsecase{
+	authCreator CreatorUsecase, otpRepository repository.OTPRepository, userRepository repository.UserRepository) *LoggerUsecase {
+	return &LoggerUsecase{
 		Usecase:        *class.NewUsecase(configuration, logger),
 		database:       database,
 		otpVerifier:    otpVerifier,
@@ -41,7 +40,7 @@ func NewProcessorUsecase(configuration internal.Configuration, logger core.Logge
 	}
 }
 
-func (self *ProcessorUsecase) Process(ctx context.Context, otpID string, code string, metadata model.SessionMetadata) (string, *model.User, error) {
+func (self *LoggerUsecase) Login(ctx context.Context, otpID string, code string, metadata model.SessionMetadata) (string, *model.User, error) {
 	otpReq, err := self.otpVerifier.Verify(ctx, otpID, code, model.OTPType.SMS)
 	if err != nil {
 		if !otp.ErrGeneric().Is(err) {

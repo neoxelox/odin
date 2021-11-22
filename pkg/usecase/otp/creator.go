@@ -21,15 +21,17 @@ type CreatorUsecase struct {
 	database      database.Database
 	otpRepository repository.OTPRepository
 	smsService    service.SMSService
+	emailService  service.EmailService
 }
 
 func NewCreatorUsecase(configuration internal.Configuration, logger core.Logger, database database.Database,
-	otpRepository repository.OTPRepository, smsService service.SMSService) *CreatorUsecase {
+	otpRepository repository.OTPRepository, smsService service.SMSService, emailService service.EmailService) *CreatorUsecase {
 	return &CreatorUsecase{
 		Usecase:       *class.NewUsecase(configuration, logger),
 		database:      database,
 		otpRepository: otpRepository,
 		smsService:    smsService,
+		emailService:  emailService,
 	}
 }
 
@@ -94,7 +96,11 @@ func (self *CreatorUsecase) send(ctx context.Context, otp model.OTP) error {
 		}
 		return nil
 	case model.OTPType.EMAIL:
-		return ErrGeneric()
+		err := self.emailService.Send(otp.Asset, message)
+		if err != nil {
+			return ErrGeneric().Wrap(err)
+		}
+		return nil
 	default:
 		return ErrGeneric()
 	}

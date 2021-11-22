@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/neoxelox/odin/internal/class"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/rs/xid"
 )
 
@@ -43,4 +44,15 @@ func NewOTP() *OTP {
 
 func (self OTP) String() string {
 	return fmt.Sprintf("<%s: %s>", self.Asset, self.ID)
+}
+
+func (self *OTP) Copy() *OTP {
+	return &OTP{
+		ID:        *utility.CopyString(&self.ID),
+		Asset:     *utility.CopyString(&self.Asset),
+		Type:      *utility.CopyString(&self.Type),
+		Code:      *utility.CopyString(&self.Code),
+		Attempts:  *utility.CopyInt(&self.Attempts),
+		ExpiresAt: *utility.CopyTime(&self.ExpiresAt),
+	}
 }

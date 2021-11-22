@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/neoxelox/odin/internal/class"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/rs/xid"
 )
 
@@ -30,4 +31,16 @@ func NewCommunity() *Community {
 
 func (self Community) String() string {
 	return fmt.Sprintf("<%s: %s>", self.Name, self.ID)
+}
+
+func (self *Community) Copy() *Community {
+	return &Community{
+		ID:         *utility.CopyString(&self.ID),
+		Address:    *utility.CopyString(&self.Address),
+		Name:       *utility.CopyString(&self.Name),
+		Categories: *utility.CopyStringSlice(&self.Categories),
+		PinnedIDs:  *utility.CopyStringSlice(&self.PinnedIDs),
+		CreatedAt:  *utility.CopyTime(&self.CreatedAt),
+		DeletedAt:  utility.CopyTime(self.DeletedAt),
+	}
 }
