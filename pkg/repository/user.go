@@ -118,3 +118,40 @@ func (self *UserRepository) UpdateProfile(ctx context.Context, id string, name s
 
 	return nil
 }
+
+func (self *UserRepository) UpdateEmail(ctx context.Context, id string, email string) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "email" = $1
+						  WHERE "id" = $2;`, USER_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, email, id)
+	if err != nil {
+		return ErrUserGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrUserGeneric()
+	}
+
+	return nil
+}
+
+func (self *UserRepository) UpdatePhone(ctx context.Context, id string, phone string) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "phone" = $1
+						  WHERE "id" = $2;`, USER_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, phone, id)
+	switch {
+	case err == nil:
+		if affected != 1 {
+			return ErrUserGeneric()
+		}
+
+		return nil
+	case database.ErrIntegrityViolation().Is(err):
+		return ErrUserExists().Wrap(err)
+	default:
+		return ErrUserGeneric().Wrap(err)
+	}
+}

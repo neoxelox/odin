@@ -236,6 +236,10 @@ func (self *Database) Transaction(ctx context.Context, fn func(ctx context.Conte
 	err = fn(context.WithValue(ctx, CONTEXT_TRANSACTION_KEY, transaction))
 	if err != nil {
 		errR := transaction.Rollback(ctx)
+		if errR == nil {
+			return ErrTransaction().AsWithDepth(1, err)
+		}
+
 		err := errors.CombineErrors(err, errR)
 		return ErrTransaction().WrapWithDepth(1, err)
 	}

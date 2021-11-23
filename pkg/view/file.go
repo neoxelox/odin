@@ -31,7 +31,7 @@ func NewFileView(configuration internal.Configuration, logger core.Logger, fileC
 	}
 }
 
-func (self *FileView) Post() (interface{}, func(ctx echo.Context) error) {
+func (self *FileView) PostFile() (interface{}, func(ctx echo.Context) error) {
 	response := &payload.PostFileResponse{}
 	return nil, func(ctx echo.Context) error {
 		file, err := ctx.FormFile("file")
@@ -69,7 +69,7 @@ func (self *FileView) Post() (interface{}, func(ctx echo.Context) error) {
 	}
 }
 
-func (self *FileView) Get() (*payload.GetFileRequest, func(ctx echo.Context) error) {
+func (self *FileView) GetFile() (*payload.GetFileRequest, func(ctx echo.Context) error) {
 	request := &payload.GetFileRequest{}
 	return request, func(ctx echo.Context) error {
 		filePath, err := self.fileGetter.Get(ctx.Request().Context(), request.Name)

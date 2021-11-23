@@ -89,7 +89,7 @@ func (self *LoggerUsecase) Login(ctx context.Context, otpID string, code string,
 	}
 
 	if user.Name == "" {
-		user = nil
+		return accessToken, nil, nil
 	}
 
 	return accessToken, user, nil

@@ -142,8 +142,9 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	sessionCreator := session.NewCreatorUsecase(configuration, logger, *database, *sessionRepository, *userRepository)
 
+	userGetter := user.NewGetterUsecase(configuration, logger, *userRepository)
 	userCreator := user.NewCreatorUsecase(configuration, logger, *userRepository)
-	userUpdater := user.NewUpdaterUsecase(configuration, logger, *userRepository)
+	userUpdater := user.NewUpdaterUsecase(configuration, logger, *database, *userRepository, *otpRepository, *otpVerifier)
 
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
@@ -155,7 +156,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	healthView := internalView.NewHealthView(configuration, logger, *database, *cache)
 	fileView := view.NewFileView(configuration, logger, *fileCreator, *fileGetter)
 	authView := view.NewAuthView(configuration, logger, *otpCreator, *authLogger)
-	userView := view.NewUserView(configuration, logger, *userUpdater)
+	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *otpCreator)
 
 	/* MIDDLEWARES */
 
@@ -180,8 +181,8 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	// NOT AUTHENTICATED
 
-	api.POST("/login/start", authView.Handle(authView.LoginStart()))
-	api.POST("/login/end", authView.Handle(authView.LoginEnd()))
+	api.POST("/login/start", authView.Handle(authView.PostLoginStart()))
+	api.POST("/login/end", authView.Handle(authView.PostLoginEnd()))
 
 	apiV1 := api.Group("/v1")
 
@@ -189,10 +190,15 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	apiV1 = apiV1.Group("", authMiddleware)
 
-	apiV1.POST("/file", fileView.Handle(fileView.Post()), fileLimitMiddleware)
-	apiV1.GET("/file/:name", fileView.Handle(fileView.Get()), fileLimitMiddleware)
+	apiV1.POST("/file", fileView.Handle(fileView.PostFile()), fileLimitMiddleware)
+	apiV1.GET("/file/:name", fileView.Handle(fileView.GetFile()), fileLimitMiddleware)
 
+	apiV1.GET("/user/profile", userView.Handle(userView.GetProfile()))
 	apiV1.POST("/user/profile", userView.Handle(userView.PostProfile()))
+	apiV1.POST("/user/email/start", userView.Handle(userView.PostEmailStart()))
+	apiV1.POST("/user/email/end", userView.Handle(userView.PostEmailEnd()))
+	apiV1.POST("/user/phone/start", userView.Handle(userView.PostPhoneStart()))
+	apiV1.POST("/user/phone/end", userView.Handle(userView.PostPhoneEnd()))
 
 	return &API{
 		API: *class.NewAPI(

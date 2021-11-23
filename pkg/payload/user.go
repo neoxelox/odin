@@ -16,6 +16,11 @@ type User struct {
 	Birthday date.Date `json:"birthday"`
 }
 
+type GetUserProfileResponse struct {
+	class.Payload
+	User
+}
+
 type PostUserProfileRequest struct {
 	class.Payload
 	Name     *string    `json:"name" validate:"omitempty,required"`
@@ -37,7 +42,7 @@ type PostUserEmailStartRequest struct {
 func (self *PostUserEmailStartRequest) Process() error {
 	err := checkmail.ValidateFormat(self.Email)
 	if err != nil {
-		return ExcInvalidEmail
+		return ExcInvalidEmail.Cause(err)
 	}
 
 	return nil

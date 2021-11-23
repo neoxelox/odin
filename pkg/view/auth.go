@@ -28,7 +28,7 @@ func NewAuthView(configuration internal.Configuration, logger core.Logger, otpCr
 	}
 }
 
-func (self *AuthView) LoginStart() (*payload.PostLoginStartRequest, func(ctx echo.Context) error) {
+func (self *AuthView) PostLoginStart() (*payload.PostLoginStartRequest, func(ctx echo.Context) error) {
 	request := &payload.PostLoginStartRequest{}
 	response := &payload.PostLoginStartResponse{}
 	return request, func(ctx echo.Context) error {
@@ -45,7 +45,7 @@ func (self *AuthView) LoginStart() (*payload.PostLoginStartRequest, func(ctx ech
 	}
 }
 
-func (self *AuthView) LoginEnd() (*payload.PostLoginEndRequest, func(ctx echo.Context) error) {
+func (self *AuthView) PostLoginEnd() (*payload.PostLoginEndRequest, func(ctx echo.Context) error) {
 	request := &payload.PostLoginEndRequest{}
 	response := &payload.PostLoginEndResponse{}
 	return request, func(ctx echo.Context) error {
