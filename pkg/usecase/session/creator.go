@@ -2,11 +2,13 @@ package session
 
 import (
 	"context"
+	"time"
 
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/class"
 	"github.com/neoxelox/odin/internal/core"
 	"github.com/neoxelox/odin/internal/database"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/neoxelox/odin/pkg/model"
 	"github.com/neoxelox/odin/pkg/repository"
 )
@@ -35,9 +37,18 @@ func (self *CreatorUsecase) Create(ctx context.Context, user model.User, metadat
 	session.UserID = user.ID
 	session.Metadata = metadata
 
+	oldSessionID := utility.CopyString(user.LastSessionID)
 	user.LastSessionID = &session.ID
 
 	err = self.database.Transaction(ctx, func(ctx context.Context) error {
+		if oldSessionID != nil {
+			now := time.Now()
+			err = self.sessionRepository.UpdateExpiredAt(ctx, *oldSessionID, &now)
+			if err != nil {
+				return ErrGeneric().Wrap(err)
+			}
+		}
+
 		session, err = self.sessionRepository.Create(ctx, *session)
 		if err != nil {
 			return ErrGeneric().Wrap(err)

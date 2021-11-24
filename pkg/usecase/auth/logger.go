@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/class"
@@ -16,27 +17,30 @@ import (
 
 type LoggerUsecase struct {
 	class.Usecase
-	database       database.Database
-	otpVerifier    otp.VerifierUsecase
-	userCreator    user.CreatorUsecase
-	sessionCreator session.CreatorUsecase
-	authCreator    CreatorUsecase
-	otpRepository  repository.OTPRepository
-	userRepository repository.UserRepository
+	database          database.Database
+	otpVerifier       otp.VerifierUsecase
+	userCreator       user.CreatorUsecase
+	sessionCreator    session.CreatorUsecase
+	authCreator       CreatorUsecase
+	otpRepository     repository.OTPRepository
+	userRepository    repository.UserRepository
+	sessionRepository repository.SessionRepository
 }
 
 func NewLoggerUsecase(configuration internal.Configuration, logger core.Logger, database database.Database,
 	otpVerifier otp.VerifierUsecase, userCreator user.CreatorUsecase, sessionCreator session.CreatorUsecase,
-	authCreator CreatorUsecase, otpRepository repository.OTPRepository, userRepository repository.UserRepository) *LoggerUsecase {
+	authCreator CreatorUsecase, otpRepository repository.OTPRepository, userRepository repository.UserRepository,
+	sessionRepository repository.SessionRepository) *LoggerUsecase {
 	return &LoggerUsecase{
-		Usecase:        *class.NewUsecase(configuration, logger),
-		database:       database,
-		otpVerifier:    otpVerifier,
-		userCreator:    userCreator,
-		sessionCreator: sessionCreator,
-		authCreator:    authCreator,
-		otpRepository:  otpRepository,
-		userRepository: userRepository,
+		Usecase:           *class.NewUsecase(configuration, logger),
+		database:          database,
+		otpVerifier:       otpVerifier,
+		userCreator:       userCreator,
+		sessionCreator:    sessionCreator,
+		authCreator:       authCreator,
+		otpRepository:     otpRepository,
+		userRepository:    userRepository,
+		sessionRepository: sessionRepository,
 	}
 }
 
@@ -93,4 +97,14 @@ func (self *LoggerUsecase) Login(ctx context.Context, otpID string, code string,
 	}
 
 	return accessToken, user, nil
+}
+
+func (self *LoggerUsecase) Logout(ctx context.Context, session model.Session) error {
+	now := time.Now()
+	err := self.sessionRepository.UpdateExpiredAt(ctx, session.ID, &now)
+	if err != nil {
+		return ErrGeneric().Wrap(err)
+	}
+
+	return nil
 }

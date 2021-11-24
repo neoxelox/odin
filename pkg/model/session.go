@@ -16,6 +16,7 @@ type Session struct {
 	Metadata   SessionMetadata `db:"metadata"`
 	CreatedAt  time.Time       `db:"created_at"`
 	LastSeenAt time.Time       `db:"last_seen_at"`
+	ExpiredAt  *time.Time      `db:"expired_at"`
 }
 
 type SessionMetadata struct {
@@ -49,5 +50,6 @@ func (self *Session) Copy() *Session {
 		},
 		CreatedAt:  *utility.CopyTime(&self.CreatedAt),
 		LastSeenAt: *utility.CopyTime(&self.LastSeenAt),
+		ExpiredAt:  utility.CopyTime(self.ExpiredAt),
 	}
 }

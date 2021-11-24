@@ -2,11 +2,13 @@ package auth
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/class"
 	"github.com/neoxelox/odin/internal/core"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/neoxelox/odin/pkg/model"
 	"github.com/neoxelox/odin/pkg/repository"
 	"github.com/vk-rv/pvx"
@@ -31,7 +33,7 @@ func NewVerifierUsecase(configuration internal.Configuration, logger core.Logger
 	}
 }
 
-func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, metadata model.SessionMetadata) (*model.Session, *model.User, error) {
+func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, path string) (*model.Session, *model.User, error) {
 	decoded := &model.AccessToken{}
 
 	err := self.codifier.Decrypt(accessToken, self.key).Scan(&decoded.Private, &decoded.Public)
@@ -43,7 +45,7 @@ func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, met
 		return nil, nil, ErrExpiredAccessToken()
 	}
 
-	if metadata.ApiVersion != decoded.Public.ApiVersion {
+	if !utility.StringIn(path, UNVERSIONED_PATHS) && strings.Split(path, "/")[1] != decoded.Public.ApiVersion {
 		return nil, nil, ErrInvalidAccessToken()
 	}
 
@@ -54,6 +56,10 @@ func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, met
 
 	if session == nil {
 		return nil, nil, ErrInvalidAccessToken()
+	}
+
+	if session.ExpiredAt != nil && time.Now().After(*session.ExpiredAt) {
+		return nil, nil, ErrExpiredSession()
 	}
 
 	user, err := self.userRepository.GetByID(ctx, session.UserID)
@@ -70,7 +76,7 @@ func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, met
 	}
 
 	if user.IsBanned {
-		return nil, nil, ErrUserBanned()
+		return nil, nil, ErrBannedUser()
 	}
 
 	session.LastSeenAt = time.Now()

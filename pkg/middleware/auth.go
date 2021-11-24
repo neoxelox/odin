@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"strings"
-
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/neoxelox/odin/internal"
@@ -34,11 +32,7 @@ func (self *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(ctx)
 		}
 
-		session, user, err := self.authVerifier.Verify(ctx.Request().Context(), ctx.Request().Header.Get(AUTH_HEADER), model.SessionMetadata{
-			IP:         ctx.RealIP(),
-			Device:     ctx.Request().Host,
-			ApiVersion: strings.Split(ctx.Path(), "/")[1],
-		})
+		session, user, err := self.authVerifier.Verify(ctx.Request().Context(), ctx.Request().Header.Get(AUTH_HEADER), ctx.Path())
 
 		switch {
 		case err == nil:
@@ -46,7 +40,8 @@ func (self *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			ctx.Set(string(model.CONTEXT_USER_KEY), user)
 			return next(ctx)
 		case auth.ErrExpiredAccessToken().Is(err), auth.ErrInvalidAccessToken().Is(err),
-			auth.ErrTamperedAccessToken().Is(err), auth.ErrUserBanned().Is(err):
+			auth.ErrTamperedAccessToken().Is(err), auth.ErrExpiredSession().Is(err),
+			auth.ErrBannedUser().Is(err):
 			return internal.ExcUnauthorized.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)

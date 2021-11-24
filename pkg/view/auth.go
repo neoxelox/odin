@@ -79,3 +79,18 @@ func (self *AuthView) PostLoginEnd() (*payload.PostLoginEndRequest, func(ctx ech
 		}
 	}
 }
+
+func (self *AuthView) PostLogout() (interface{}, func(ctx echo.Context) error) {
+	response := &payload.PostLogoutResponse{}
+	return nil, func(ctx echo.Context) error {
+		reqSession := RequestSession(ctx)
+
+		err := self.authLogger.Logout(ctx.Request().Context(), *reqSession)
+		switch {
+		case err == nil:
+			return ctx.JSON(http.StatusOK, response)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	}
+}

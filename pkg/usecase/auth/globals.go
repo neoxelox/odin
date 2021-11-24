@@ -7,5 +7,12 @@ var (
 	ErrTamperedAccessToken = internal.NewError("Access token decryption failed")
 	ErrExpiredAccessToken  = internal.NewError("Access token is expired")
 	ErrInvalidAccessToken  = internal.NewError("Access token is invalid")
-	ErrUserBanned          = internal.NewError("User is banned")
+	ErrExpiredSession      = internal.NewError("Session has expired")
+	ErrBannedUser          = internal.NewError("User is banned")
 )
+
+var UNVERSIONED_PATHS = []string{
+	"/login/start",
+	"/login/end",
+	"/logout",
+}

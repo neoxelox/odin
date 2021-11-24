@@ -149,7 +149,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
 	authLogger := auth.NewLoggerUsecase(configuration, logger, *database, *otpVerifier, *userCreator,
-		*sessionCreator, *authCreator, *otpRepository, *userRepository)
+		*sessionCreator, *authCreator, *otpRepository, *userRepository, *sessionRepository)
 
 	/* VIEWS */
 
@@ -177,18 +177,26 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	api.Use(gzipMiddleware)
 	api.Use(timeoutMiddleware)
 
-	api.GET("/health", healthView.Handle(healthView.GetHealth()))
-
 	// NOT AUTHENTICATED
+
+	api.GET("/health", healthView.Handle(healthView.GetHealth()))
 
 	api.POST("/login/start", authView.Handle(authView.PostLoginStart()))
 	api.POST("/login/end", authView.Handle(authView.PostLoginEnd()))
+
+	// VERSIONED
 
 	apiV1 := api.Group("/v1")
 
 	// AUTHENTICATED
 
-	apiV1 = apiV1.Group("", authMiddleware)
+	api = api.Group("", authMiddleware)
+
+	api.POST("/logout", authView.Handle(authView.PostLogout()))
+
+	// VERSIONED
+
+	apiV1 = api.Group("/v1")
 
 	apiV1.POST("/file", fileView.Handle(fileView.PostFile()), fileLimitMiddleware)
 	apiV1.GET("/file/:name", fileView.Handle(fileView.GetFile()), fileLimitMiddleware)

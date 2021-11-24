@@ -30,11 +30,6 @@ func (self *EmailService) Send(receiverEmail string, message string) error {
 		return ErrEmailInvalid().Wrap(err)
 	}
 
-	err = checkmail.ValidateHost(receiverEmail)
-	if err != nil {
-		return ErrEmailInvalid().Wrap(err)
-	}
-
 	if self.Configuration.Environment == internal.Environment.PRODUCTION {
 		return self.sendReal(receiverEmail, message)
 	} else {

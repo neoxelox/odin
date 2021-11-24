@@ -30,12 +30,12 @@ func (self *SessionRepository) Create(ctx context.Context, session model.Session
 	var s model.Session
 
 	query := fmt.Sprintf(`INSERT INTO "%s"
-						  ("id", "user_id", "metadata", "created_at", "last_seen_at")
-						  VALUES ($1, $2, $3, $4, $5)
+						  ("id", "user_id", "metadata", "created_at", "last_seen_at", "expired_at")
+						  VALUES ($1, $2, $3, $4, $5, $6)
 						  RETURNING *;`, SESSION_TABLE)
 
 	err := self.Database.Query(
-		ctx, query, session.ID, session.UserID, session.Metadata, session.CreatedAt, session.LastSeenAt).Scan(&s)
+		ctx, query, session.ID, session.UserID, session.Metadata, session.CreatedAt, session.LastSeenAt, session.ExpiredAt).Scan(&s)
 	if err != nil {
 		return nil, ErrSessionGeneric().Wrap(err)
 	}
@@ -66,6 +66,23 @@ func (self *SessionRepository) UpdateLastSeen(ctx context.Context, id string, la
 						  WHERE "id" = $2;`, SESSION_TABLE)
 
 	affected, err := self.Database.Exec(ctx, query, lastSeen, id)
+	if err != nil {
+		return ErrSessionGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrSessionGeneric()
+	}
+
+	return nil
+}
+
+func (self *SessionRepository) UpdateExpiredAt(ctx context.Context, id string, expiredAt *time.Time) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "expired_at" = $1
+						  WHERE "id" = $2;`, SESSION_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, expiredAt, id)
 	if err != nil {
 		return ErrSessionGeneric().Wrap(err)
 	}
