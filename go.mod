@@ -20,6 +20,7 @@ require (
 	github.com/randallmlough/pgxscan v0.3.0
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.26.0
+	github.com/scylladb/go-set v1.0.2
 	github.com/twilio/twilio-go v0.18.0
 	github.com/vk-rv/pvx v0.0.0-20210912195928-ac00bc32f6e7
 )

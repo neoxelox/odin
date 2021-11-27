@@ -58,16 +58,16 @@ services:
     volumes:
       - "./:/app"
 
-  dev:
-    build:
-      context: ./
-      dockerfile: ./Dockerfile
-    container_name: dev
-    stdin_open: true
-    tty: true
-    env_file: ./.env.dev
-    volumes:
-      - "./:/workspace"
+  # dev:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./Dockerfile
+  #   container_name: dev
+  #   stdin_open: true
+  #   tty: true
+  #   env_file: ./.env.dev
+  #   volumes:
+  #     - "./:/workspace"
 
   # locust-master:
   #   container_name: locust-master

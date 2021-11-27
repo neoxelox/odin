@@ -42,8 +42,7 @@ func (self *CreatorUsecase) Create(ctx context.Context, user model.User, metadat
 
 	err = self.database.Transaction(ctx, func(ctx context.Context) error {
 		if oldSessionID != nil {
-			now := time.Now()
-			err = self.sessionRepository.UpdateExpiredAt(ctx, *oldSessionID, &now)
+			err = self.sessionRepository.UpdateExpiredAt(ctx, *oldSessionID, time.Now())
 			if err != nil {
 				return ErrGeneric().Wrap(err)
 			}

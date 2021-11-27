@@ -20,8 +20,7 @@ func NewCreatorUsecase(configuration internal.Configuration, logger core.Logger)
 }
 
 func (self *CreatorUsecase) Create(ctx context.Context, fileName string) (string, error) {
-	fileOrigin := fmt.Sprintf("http://%s:%d", self.Configuration.AppHost, self.Configuration.AppPort)
-	fileURL := fmt.Sprintf("%s/v1/file/%s", fileOrigin, fileName)
+	fileURL := fmt.Sprintf("http://%s:%d/file/%s", self.Configuration.AppHost, self.Configuration.AppPort, fileName)
 
 	if self.Configuration.Environment == internal.Environment.PRODUCTION {
 		return "", ErrGeneric()

@@ -17,43 +17,46 @@ type UserView struct {
 	class.View
 	userGetter  user.GetterUsecase
 	userUpdater user.UpdaterUsecase
+	userDeleter user.DeleterUsecase
 	otpCreator  otp.CreatorUsecase
 }
 
 func NewUserView(configuration internal.Configuration, logger core.Logger, userGetter user.GetterUsecase,
-	userUpdater user.UpdaterUsecase, otpCreator otp.CreatorUsecase) *UserView {
+	userUpdater user.UpdaterUsecase, userDeleter user.DeleterUsecase, otpCreator otp.CreatorUsecase) *UserView {
 	return &UserView{
 		View:        *class.NewView(configuration, logger),
 		userGetter:  userGetter,
 		userUpdater: userUpdater,
+		userDeleter: userDeleter,
 		otpCreator:  otpCreator,
 	}
 }
 
-func (self *UserView) GetProfile() (interface{}, func(ctx echo.Context) error) {
+func (self *UserView) GetProfile(ctx echo.Context) error {
+	requestUser := RequestUser(ctx)
 	response := &payload.PostUserProfileResponse{}
-	return nil, func(ctx echo.Context) error {
-		reqUser := RequestUser(ctx)
-
+	return self.Handle(ctx, class.Endpoint{}, func() error {
 		response.User = payload.User{
-			ID:       reqUser.ID,
-			Phone:    reqUser.Phone,
-			Name:     reqUser.Name,
-			Email:    reqUser.Email,
-			Picture:  reqUser.Picture,
-			Birthday: reqUser.Birthday,
+			ID:       requestUser.ID,
+			Phone:    requestUser.Phone,
+			Name:     requestUser.Name,
+			Email:    requestUser.Email,
+			Picture:  requestUser.Picture,
+			Birthday: requestUser.Birthday,
 		}
+
 		return ctx.JSON(http.StatusOK, response)
-	}
+	})
 }
 
-func (self *UserView) PostProfile() (*payload.PostUserProfileRequest, func(ctx echo.Context) error) {
+func (self *UserView) PostProfile(ctx echo.Context) error {
 	request := &payload.PostUserProfileRequest{}
+	requestUser := RequestUser(ctx)
 	response := &payload.PostUserProfileResponse{}
-	return request, func(ctx echo.Context) error {
-		reqUser := RequestUser(ctx)
-
-		updatedUser, err := self.userUpdater.UpdateProfile(ctx.Request().Context(), *reqUser, request.Name, request.LastName,
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		updatedUser, err := self.userUpdater.UpdateProfile(ctx.Request().Context(), *requestUser, request.Name, request.LastName,
 			request.Picture, request.Birthday)
 		switch {
 		case err == nil:
@@ -71,13 +74,15 @@ func (self *UserView) PostProfile() (*payload.PostUserProfileRequest, func(ctx e
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
 }
 
-func (self *UserView) PostEmailStart() (*payload.PostUserEmailStartRequest, func(ctx echo.Context) error) {
+func (self *UserView) PostEmailStart(ctx echo.Context) error {
 	request := &payload.PostUserEmailStartRequest{}
 	response := &payload.PostUserEmailStartResponse{}
-	return request, func(ctx echo.Context) error {
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
 		newOTP, err := self.otpCreator.Create(ctx.Request().Context(), request.Email, model.OTPType.EMAIL)
 		switch {
 		case err == nil:
@@ -88,16 +93,17 @@ func (self *UserView) PostEmailStart() (*payload.PostUserEmailStartRequest, func
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
 }
 
-func (self *UserView) PostEmailEnd() (*payload.PostUserEmailEndRequest, func(ctx echo.Context) error) {
+func (self *UserView) PostEmailEnd(ctx echo.Context) error {
 	request := &payload.PostUserEmailEndRequest{}
+	requestUser := RequestUser(ctx)
 	response := &payload.PostUserEmailEndResponse{}
-	return request, func(ctx echo.Context) error {
-		reqUser := RequestUser(ctx)
-
-		email, err := self.userUpdater.UpdateEmail(ctx.Request().Context(), *reqUser, request.ID, request.Code)
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		email, err := self.userUpdater.UpdateEmail(ctx.Request().Context(), *requestUser, request.ID, request.Code)
 		switch {
 		case err == nil:
 			response.Email = email
@@ -113,13 +119,15 @@ func (self *UserView) PostEmailEnd() (*payload.PostUserEmailEndRequest, func(ctx
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
 }
 
-func (self *UserView) PostPhoneStart() (*payload.PostUserPhoneStartRequest, func(ctx echo.Context) error) {
+func (self *UserView) PostPhoneStart(ctx echo.Context) error {
 	request := &payload.PostUserPhoneStartRequest{}
 	response := &payload.PostUserPhoneStartResponse{}
-	return request, func(ctx echo.Context) error {
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
 		newOTP, err := self.otpCreator.Create(ctx.Request().Context(), request.Phone, model.OTPType.SMS)
 		switch {
 		case err == nil:
@@ -130,16 +138,17 @@ func (self *UserView) PostPhoneStart() (*payload.PostUserPhoneStartRequest, func
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
 }
 
-func (self *UserView) PostPhoneEnd() (*payload.PostUserPhoneEndRequest, func(ctx echo.Context) error) {
+func (self *UserView) PostPhoneEnd(ctx echo.Context) error {
 	request := &payload.PostUserPhoneEndRequest{}
+	requestUser := RequestUser(ctx)
 	response := &payload.PostUserPhoneEndResponse{}
-	return request, func(ctx echo.Context) error {
-		reqUser := RequestUser(ctx)
-
-		phone, err := self.userUpdater.UpdatePhone(ctx.Request().Context(), *reqUser, request.ID, request.Code)
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		phone, err := self.userUpdater.UpdatePhone(ctx.Request().Context(), *requestUser, request.ID, request.Code)
 		switch {
 		case err == nil:
 			response.Phone = phone
@@ -155,5 +164,19 @@ func (self *UserView) PostPhoneEnd() (*payload.PostUserPhoneEndRequest, func(ctx
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
+}
+
+func (self *UserView) DeleteUser(ctx echo.Context) error {
+	requestUser := RequestUser(ctx)
+	response := &payload.DeleteUserResponse{}
+	return self.Handle(ctx, class.Endpoint{}, func() error {
+		err := self.userDeleter.Delete(ctx.Request().Context(), *requestUser)
+		switch {
+		case err == nil:
+			return ctx.JSON(http.StatusOK, response)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
 }

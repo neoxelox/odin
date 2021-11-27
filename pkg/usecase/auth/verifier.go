@@ -8,7 +8,6 @@ import (
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/class"
 	"github.com/neoxelox/odin/internal/core"
-	"github.com/neoxelox/odin/internal/utility"
 	"github.com/neoxelox/odin/pkg/model"
 	"github.com/neoxelox/odin/pkg/repository"
 	"github.com/vk-rv/pvx"
@@ -45,7 +44,7 @@ func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, pat
 		return nil, nil, ErrExpiredAccessToken()
 	}
 
-	if !utility.StringIn(path, UNVERSIONED_PATHS) && strings.Split(path, "/")[1] != decoded.Public.ApiVersion {
+	if !UNVERSIONED_PATHS.MatchString(path) && strings.Split(path, "/")[1] != decoded.Public.ApiVersion {
 		return nil, nil, ErrInvalidAccessToken()
 	}
 
@@ -73,6 +72,10 @@ func (self *VerifierUsecase) Verify(ctx context.Context, accessToken string, pat
 
 	if *user.LastSessionID != session.ID {
 		return nil, nil, ErrInvalidAccessToken()
+	}
+
+	if user.DeletedAt != nil {
+		return nil, nil, ErrDeletedUser()
 	}
 
 	if user.IsBanned {

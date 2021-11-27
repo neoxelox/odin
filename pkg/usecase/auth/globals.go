@@ -1,6 +1,10 @@
 package auth
 
-import "github.com/neoxelox/odin/internal"
+import (
+	"regexp"
+
+	"github.com/neoxelox/odin/internal"
+)
 
 var (
 	ErrGeneric             = internal.NewError("Auth execution failed")
@@ -8,11 +12,8 @@ var (
 	ErrExpiredAccessToken  = internal.NewError("Access token is expired")
 	ErrInvalidAccessToken  = internal.NewError("Access token is invalid")
 	ErrExpiredSession      = internal.NewError("Session has expired")
+	ErrDeletedUser         = internal.NewError("User is deleted")
 	ErrBannedUser          = internal.NewError("User is banned")
 )
 
-var UNVERSIONED_PATHS = []string{
-	"/login/start",
-	"/login/end",
-	"/logout",
-}
+var UNVERSIONED_PATHS = regexp.MustCompile(`^/(login|logout|file).*$`)

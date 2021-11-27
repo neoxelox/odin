@@ -31,9 +31,9 @@ func NewFileView(configuration internal.Configuration, logger core.Logger, fileC
 	}
 }
 
-func (self *FileView) PostFile() (interface{}, func(ctx echo.Context) error) {
+func (self *FileView) PostFile(ctx echo.Context) error {
 	response := &payload.PostFileResponse{}
-	return nil, func(ctx echo.Context) error {
+	return self.Handle(ctx, class.Endpoint{}, func() error {
 		file, err := ctx.FormFile("file")
 		if err != nil {
 			return internal.ExcClientGeneric.Cause(err)
@@ -66,17 +66,19 @@ func (self *FileView) PostFile() (interface{}, func(ctx echo.Context) error) {
 		response.URL = fileURL
 
 		return ctx.JSON(http.StatusOK, response)
-	}
+	})
 }
 
-func (self *FileView) GetFile() (*payload.GetFileRequest, func(ctx echo.Context) error) {
+func (self *FileView) GetFile(ctx echo.Context) error {
 	request := &payload.GetFileRequest{}
-	return request, func(ctx echo.Context) error {
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
 		filePath, err := self.fileGetter.Get(ctx.Request().Context(), request.Name)
 		if err != nil {
 			return internal.ExcServerGeneric.Cause(err)
 		}
 
 		return ctx.File(filePath)
-	}
+	})
 }

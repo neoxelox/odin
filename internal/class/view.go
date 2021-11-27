@@ -1,6 +1,8 @@
 package class
 
 import (
+	"time"
+
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/core"
 
@@ -25,28 +27,38 @@ func NewView(configuration internal.Configuration, logger core.Logger) *View {
 	}
 }
 
-func (self *View) Handle(request interface{}, handler func(ctx echo.Context) error) func(ctx echo.Context) error {
-	return func(ctx echo.Context) error {
-		if request != nil {
-			err := ctx.Bind(request)
-			if err != nil {
-				return internal.ExcInvalidRequest.Cause(err)
-			}
+type Handler func() error
 
-			err = ctx.Validate(request)
-			if err != nil {
-				return internal.ExcInvalidRequest.Cause(err)
-			}
+type KeyFunc func(ctx echo.Context) string
 
-			v, ok := request.(process)
-			if ok {
-				err = v.Process()
-				if err != nil {
-					return err // Let Process() raise its own exceptions
-				}
-			}
+type Endpoint struct {
+	Request       interface{}
+	CacheKey      KeyFunc
+	CacheTTL      time.Duration
+	RatelimitKey  KeyFunc
+	RatelimitRate string
+}
+
+func (self *View) Handle(ctx echo.Context, endpoint Endpoint, handler Handler) error {
+	if endpoint.Request != nil {
+		err := ctx.Bind(endpoint.Request)
+		if err != nil {
+			return internal.ExcInvalidRequest.Cause(err)
 		}
 
-		return handler(ctx)
+		err = ctx.Validate(endpoint.Request)
+		if err != nil {
+			return internal.ExcInvalidRequest.Cause(err)
+		}
+
+		v, ok := endpoint.Request.(process)
+		if ok {
+			err = v.Process()
+			if err != nil {
+				return err // Let Process() raise its own exceptions
+			}
+		}
 	}
+
+	return handler()
 }

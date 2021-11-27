@@ -10,6 +10,7 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"github.com/scylladb/go-set/strset"
 
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/cache"
@@ -45,6 +46,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	if configuration.Environment == internal.Environment.PRODUCTION {
 		apiOrigin = fmt.Sprintf("https://%s", apiHost)
 	}
+	apiOrigins := strset.New(append([]string{apiOrigin}, configuration.AppOrigins...)...).List()
 
 	/* DEPENDENCIES */
 
@@ -75,14 +77,14 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	loggerMiddleware := internalMiddleware.NewLoggerMiddleware(configuration, logger).Handle
 	recoverMiddleware := echoMiddleware.Recover()
 	corsMiddleware := echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins: []string{apiOrigin},
-		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut},
+		AllowOrigins: apiOrigins,
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodHead, http.MethodOptions},
 		AllowHeaders: []string{"*"},
 		MaxAge:       86400,
 	})
 	bodyLimitMiddleware := echoMiddleware.BodyLimitWithConfig(echoMiddleware.BodyLimitConfig{
 		Skipper: func(c echo.Context) bool {
-			return strings.HasPrefix(c.Path(), strings.TrimPrefix(internal.ASSETS_PATH, "."))
+			return c.Request().Method == http.MethodPost && c.Path() == "/file"
 		},
 		Limit: utility.SizeToString(configuration.RequestBodyMaxSize),
 	})
@@ -96,13 +98,13 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 		HSTSMaxAge:            31536000,
 		HSTSExcludeSubdomains: false,
 		HSTSPreloadEnabled:    true,
-		ContentSecurityPolicy: fmt.Sprintf("default-src %s", apiOrigin),
+		ContentSecurityPolicy: fmt.Sprintf("default-src %s", strings.Join(apiOrigins, " ")),
 		CSPReportOnly:         false,
 		ReferrerPolicy:        "same-origin",
 	})
 	gzipMiddleware := echoMiddleware.GzipWithConfig(echoMiddleware.GzipConfig{
-		Skipper: func(c echo.Context) bool {
-			return strings.HasPrefix(c.Path(), strings.TrimPrefix(internal.ASSETS_PATH, "."))
+		Skipper: func(c echo.Context) bool { // TODO: Refactorize this!
+			return strings.HasPrefix(c.Path(), "/file") || strings.HasPrefix(c.Path(), strings.TrimPrefix(internal.ASSETS_PATH, "."))
 		},
 		Level: 5,
 	})
@@ -145,6 +147,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userGetter := user.NewGetterUsecase(configuration, logger, *userRepository)
 	userCreator := user.NewCreatorUsecase(configuration, logger, *userRepository)
 	userUpdater := user.NewUpdaterUsecase(configuration, logger, *database, *userRepository, *otpRepository, *otpVerifier)
+	userDeleter := user.NewDeleterUsecase(configuration, logger, *userRepository)
 
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
@@ -156,7 +159,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	healthView := internalView.NewHealthView(configuration, logger, *database, *cache)
 	fileView := view.NewFileView(configuration, logger, *fileCreator, *fileGetter)
 	authView := view.NewAuthView(configuration, logger, *otpCreator, *authLogger)
-	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *otpCreator)
+	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *userDeleter, *otpCreator)
 
 	/* MIDDLEWARES */
 
@@ -179,10 +182,10 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	// NOT AUTHENTICATED
 
-	api.GET("/health", healthView.Handle(healthView.GetHealth()))
+	api.GET("/health", healthView.GetHealth)
 
-	api.POST("/login/start", authView.Handle(authView.PostLoginStart()))
-	api.POST("/login/end", authView.Handle(authView.PostLoginEnd()))
+	api.POST("/login/start", authView.PostLoginStart)
+	api.POST("/login/end", authView.PostLoginEnd)
 
 	// VERSIONED
 
@@ -192,21 +195,21 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	api = api.Group("", authMiddleware)
 
-	api.POST("/logout", authView.Handle(authView.PostLogout()))
+	api.POST("/file", fileView.PostFile, fileLimitMiddleware)
+	api.GET("/file/:name", fileView.GetFile, fileLimitMiddleware)
+	api.POST("/logout", authView.PostLogout)
 
 	// VERSIONED
 
 	apiV1 = api.Group("/v1")
 
-	apiV1.POST("/file", fileView.Handle(fileView.PostFile()), fileLimitMiddleware)
-	apiV1.GET("/file/:name", fileView.Handle(fileView.GetFile()), fileLimitMiddleware)
-
-	apiV1.GET("/user/profile", userView.Handle(userView.GetProfile()))
-	apiV1.POST("/user/profile", userView.Handle(userView.PostProfile()))
-	apiV1.POST("/user/email/start", userView.Handle(userView.PostEmailStart()))
-	apiV1.POST("/user/email/end", userView.Handle(userView.PostEmailEnd()))
-	apiV1.POST("/user/phone/start", userView.Handle(userView.PostPhoneStart()))
-	apiV1.POST("/user/phone/end", userView.Handle(userView.PostPhoneEnd()))
+	apiV1.GET("/user/profile", userView.GetProfile)
+	apiV1.POST("/user/profile", userView.PostProfile)
+	apiV1.POST("/user/email/start", userView.PostEmailStart)
+	apiV1.POST("/user/email/end", userView.PostEmailEnd)
+	apiV1.POST("/user/phone/start", userView.PostPhoneStart)
+	apiV1.POST("/user/phone/end", userView.PostPhoneEnd)
+	apiV1.DELETE("/user", userView.DeleteUser)
 
 	return &API{
 		API: *class.NewAPI(

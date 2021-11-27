@@ -25,8 +25,8 @@ func NewHealthView(configuration internal.Configuration, logger core.Logger, dat
 	}
 }
 
-func (self *HealthView) GetHealth() (interface{}, func(ctx echo.Context) error) {
-	return nil, func(ctx echo.Context) error {
+func (self *HealthView) GetHealth(ctx echo.Context) error {
+	return self.Handle(ctx, class.Endpoint{}, func() error {
 		err := self.database.Health(ctx.Request().Context())
 		if err != nil {
 			return internal.ExcServerUnavailable.Cause(err)
@@ -38,5 +38,5 @@ func (self *HealthView) GetHealth() (interface{}, func(ctx echo.Context) error) 
 		}
 
 		return ctx.String(http.StatusOK, "OK\n")
-	}
+	})
 }

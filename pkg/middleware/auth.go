@@ -41,7 +41,7 @@ func (self *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(ctx)
 		case auth.ErrExpiredAccessToken().Is(err), auth.ErrInvalidAccessToken().Is(err),
 			auth.ErrTamperedAccessToken().Is(err), auth.ErrExpiredSession().Is(err),
-			auth.ErrBannedUser().Is(err):
+			auth.ErrDeletedUser().Is(err), auth.ErrBannedUser().Is(err):
 			return internal.ExcUnauthorized.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)

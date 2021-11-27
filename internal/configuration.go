@@ -34,6 +34,7 @@ type Configuration struct {
 	AppHost    string
 	AppPort    int
 	AppRelease string
+	AppOrigins []string
 	AppName    string
 
 	TwilioBaseURL    string
@@ -74,6 +75,7 @@ func NewConfiguration(override *Configuration) *Configuration {
 		AppHost:    utility.GetEnvAsString("ODIN_HOST", "localhost"),
 		AppPort:    utility.GetEnvAsInt("ODIN_PORT", 1111),
 		AppRelease: utility.GetEnvAsString("ODIN_RELEASE", "fake"),
+		AppOrigins: utility.GetEnvAsSlice("ODIN_ORIGINS", []string{"http://localhost:1111"}),
 		AppName:    "odin",
 
 		TwilioBaseURL:    utility.GetEnvAsString("ODIN_TWILIO_BASE_URL", "https://api.twilio.com/2010-04-01"),

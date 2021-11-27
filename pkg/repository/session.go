@@ -77,7 +77,7 @@ func (self *SessionRepository) UpdateLastSeen(ctx context.Context, id string, la
 	return nil
 }
 
-func (self *SessionRepository) UpdateExpiredAt(ctx context.Context, id string, expiredAt *time.Time) error {
+func (self *SessionRepository) UpdateExpiredAt(ctx context.Context, id string, expiredAt time.Time) error {
 	query := fmt.Sprintf(`UPDATE "%s"
 						  SET "expired_at" = $1
 						  WHERE "id" = $2;`, SESSION_TABLE)

@@ -100,8 +100,7 @@ func (self *LoggerUsecase) Login(ctx context.Context, otpID string, code string,
 }
 
 func (self *LoggerUsecase) Logout(ctx context.Context, session model.Session) error {
-	now := time.Now()
-	err := self.sessionRepository.UpdateExpiredAt(ctx, session.ID, &now)
+	err := self.sessionRepository.UpdateExpiredAt(ctx, session.ID, time.Now())
 	if err != nil {
 		return ErrGeneric().Wrap(err)
 	}

@@ -28,10 +28,12 @@ func NewAuthView(configuration internal.Configuration, logger core.Logger, otpCr
 	}
 }
 
-func (self *AuthView) PostLoginStart() (*payload.PostLoginStartRequest, func(ctx echo.Context) error) {
+func (self *AuthView) PostLoginStart(ctx echo.Context) error {
 	request := &payload.PostLoginStartRequest{}
 	response := &payload.PostLoginStartResponse{}
-	return request, func(ctx echo.Context) error {
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
 		newOTP, err := self.otpCreator.Create(ctx.Request().Context(), request.Phone, model.OTPType.SMS)
 		switch {
 		case err == nil:
@@ -42,13 +44,15 @@ func (self *AuthView) PostLoginStart() (*payload.PostLoginStartRequest, func(ctx
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
 }
 
-func (self *AuthView) PostLoginEnd() (*payload.PostLoginEndRequest, func(ctx echo.Context) error) {
+func (self *AuthView) PostLoginEnd(ctx echo.Context) error {
 	request := &payload.PostLoginEndRequest{}
 	response := &payload.PostLoginEndResponse{}
-	return request, func(ctx echo.Context) error {
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
 		accessToken, user, err := self.authLogger.Login(ctx.Request().Context(), request.ID, request.Code, model.SessionMetadata{
 			IP:         ctx.RealIP(),
 			Device:     ctx.Request().Host,
@@ -77,20 +81,19 @@ func (self *AuthView) PostLoginEnd() (*payload.PostLoginEndRequest, func(ctx ech
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
 }
 
-func (self *AuthView) PostLogout() (interface{}, func(ctx echo.Context) error) {
+func (self *AuthView) PostLogout(ctx echo.Context) error {
+	requestSession := RequestSession(ctx)
 	response := &payload.PostLogoutResponse{}
-	return nil, func(ctx echo.Context) error {
-		reqSession := RequestSession(ctx)
-
-		err := self.authLogger.Logout(ctx.Request().Context(), *reqSession)
+	return self.Handle(ctx, class.Endpoint{}, func() error {
+		err := self.authLogger.Logout(ctx.Request().Context(), *requestSession)
 		switch {
 		case err == nil:
 			return ctx.JSON(http.StatusOK, response)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
-	}
+	})
 }

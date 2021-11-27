@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/aodin/date"
 	"github.com/neoxelox/odin/internal"
@@ -72,7 +73,7 @@ func (self *UserRepository) GetByPhone(ctx context.Context, phone string) (*mode
 	var u model.User
 
 	query := fmt.Sprintf(`SELECT * FROM "%s"
-						  WHERE "phone" = $1;`, USER_TABLE)
+						  WHERE "phone" = $1 AND "deleted_at" IS NULL;`, USER_TABLE)
 
 	err := self.Database.Query(ctx, query, phone).Scan(&u)
 	switch {
@@ -154,4 +155,21 @@ func (self *UserRepository) UpdatePhone(ctx context.Context, id string, phone st
 	default:
 		return ErrUserGeneric().Wrap(err)
 	}
+}
+
+func (self *UserRepository) UpdateDeletedAt(ctx context.Context, id string, deletedAt time.Time) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "deleted_at" = $1
+						  WHERE "id" = $2;`, USER_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, deletedAt, id)
+	if err != nil {
+		return ErrUserGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrUserGeneric()
+	}
+
+	return nil
 }

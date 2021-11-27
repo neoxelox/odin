@@ -16,11 +16,9 @@ var (
 )
 
 func RequestSession(ctx echo.Context) *model.Session {
-	session, _ := ctx.Get(string(model.CONTEXT_SESSION_KEY)).(*model.Session)
-	return session
+	return ctx.Get(string(model.CONTEXT_SESSION_KEY)).(*model.Session)
 }
 
 func RequestUser(ctx echo.Context) *model.User {
-	user, _ := ctx.Get(string(model.CONTEXT_USER_KEY)).(*model.User)
-	return user
+	return ctx.Get(string(model.CONTEXT_USER_KEY)).(*model.User)
 }

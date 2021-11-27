@@ -160,8 +160,7 @@ func (self *Database) Query(ctx context.Context, sql string, args ...interface{}
 			var err error
 
 			if ctx.Value(CONTEXT_TRANSACTION_KEY) != nil {
-				transaction, _ := ctx.Value(CONTEXT_TRANSACTION_KEY).(pgx.Tx)
-				rows, err = transaction.Query(ctx, sql, args...)
+				rows, err = ctx.Value(CONTEXT_TRANSACTION_KEY).(pgx.Tx).Query(ctx, sql, args...)
 			} else {
 				rows, err = self.pool.Query(ctx, sql, args...)
 			}
@@ -188,8 +187,7 @@ func (self *Database) Exec(ctx context.Context, sql string, args ...interface{})
 	var err error
 
 	if ctx.Value(CONTEXT_TRANSACTION_KEY) != nil {
-		transaction, _ := ctx.Value(CONTEXT_TRANSACTION_KEY).(pgx.Tx)
-		command, err = transaction.Exec(ctx, sql, args...)
+		command, err = ctx.Value(CONTEXT_TRANSACTION_KEY).(pgx.Tx).Exec(ctx, sql, args...)
 	} else {
 		command, err = self.pool.Exec(ctx, sql, args...)
 	}

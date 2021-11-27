@@ -99,8 +99,7 @@ func (self Logger) Flush() {
 
 func (self Logger) Close(ctx context.Context) error {
 	self.Flush()
-	dw, _ := self.out.(diode.Writer)
-	return dw.Close()
+	return self.out.(diode.Writer).Close()
 }
 
 func (self Logger) Output() io.Writer {
@@ -204,7 +203,7 @@ func (self Logger) Error(i ...interface{}) {
 	} else {
 		if i != nil {
 			if len(i) == 1 {
-				err, _ := i[0].(error)
+				err := i[0].(error)
 				if ierr, ok := i[0].(*internal.Error); ok {
 					err = ierr.Unwrap()
 				}

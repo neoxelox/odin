@@ -99,3 +99,7 @@ type PostUserPhoneEndResponse struct {
 	class.Payload
 	Phone string `json:"phone"`
 }
+
+type DeleteUserResponse struct {
+	class.Payload
+}
