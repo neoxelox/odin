@@ -10,9 +10,13 @@ import (
 )
 
 var (
-	ExcOTPAlreadySend = internal.NewException(http.StatusForbidden, "ERR_OTP_ALREADY_SEND")
-	ExcOTPMaxAttempts = internal.NewException(http.StatusForbidden, "ERR_OTP_MAX_ATTEMPTS")
-	ExcOTPWrongCode   = internal.NewException(http.StatusForbidden, "ERR_OTP_WRONG_CODE")
+	ExcOTPAlreadySent     = internal.NewException(http.StatusForbidden, "ERR_OTP_ALREADY_SENT")
+	ExcOTPMaxAttempts     = internal.NewException(http.StatusForbidden, "ERR_OTP_MAX_ATTEMPTS")
+	ExcOTPWrongCode       = internal.NewException(http.StatusForbidden, "ERR_OTP_WRONG_CODE")
+	ExcUserAlreadyJoined  = internal.NewException(http.StatusForbidden, "ERR_USER_ALREADY_JOINED")
+	ExcUserNotBelongs     = internal.NewException(http.StatusForbidden, "ERR_USER_NOT_BELONGS")
+	ExcUserNotPermission  = internal.NewException(http.StatusForbidden, "ERR_USER_NOT_PERMISSION")
+	ExcUserAlreadyInvited = internal.NewException(http.StatusForbidden, "ERR_USER_ALREADY_INVITED")
 )
 
 func RequestSession(ctx echo.Context) *model.Session {

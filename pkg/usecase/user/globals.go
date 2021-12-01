@@ -4,6 +4,7 @@ import "github.com/neoxelox/odin/internal"
 
 var (
 	ErrGeneric         = internal.NewError("User execution failed")
+	ErrInvalid         = internal.NewError("User is invalid")
 	ErrInvalidPhone    = internal.NewError("User phone invalid")
 	ErrInvalidName     = internal.NewError("User name invalid")
 	ErrInvalidPicture  = internal.NewError("User picture invalid")

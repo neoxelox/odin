@@ -52,14 +52,19 @@ func (self *UpdaterUsecase) UpdateProfile(ctx context.Context, user model.User, 
 		updatedUser.Birthday = *birthday
 	}
 
-	if updatedUser.Name == "" {
+	if len(updatedUser.Name) < model.USER_NAME_MIN_LENGTH || len(updatedUser.Name) > model.USER_NAME_MAX_LENGTH {
 		return nil, ErrInvalidName()
 	}
 
 	if updatedUser.Picture == "" {
-		picture := fmt.Sprintf(model.USER_DEFAULT_PICTURE, url.QueryEscape(updatedUser.Name))
-		updatedUser.Picture = picture
+		updatedUser.Picture = fmt.Sprintf(model.USER_DEFAULT_PICTURE, url.QueryEscape(updatedUser.Name))
 	}
+
+	pictureURL, err := url.ParseRequestURI(updatedUser.Picture)
+	if err != nil {
+		return nil, ErrInvalidPicture().Wrap(err)
+	}
+	updatedUser.Picture = pictureURL.String()
 
 	if user.Name != updatedUser.Name || user.Picture != updatedUser.Picture || !user.Birthday.Equals(updatedUser.Birthday) {
 		err := self.userRepository.UpdateProfile(ctx, updatedUser.ID, updatedUser.Name, updatedUser.Picture, updatedUser.Birthday)

@@ -9,6 +9,25 @@ import (
 	"github.com/rs/xid"
 )
 
+const (
+	COMMUNITY_ADDRESS_MAX_LENGTH = 100
+	COMMUNITY_ADDRESS_MIN_LENGTH = 1
+	COMMUNITY_NAME_MAX_LENGTH    = 100
+	COMMUNITY_NAME_MIN_LENGTH    = 1
+)
+
+var (
+	COMMUNITY_DEFAULT_CATEGORIES = []string{
+		"Suministros",
+		"Desagües",
+		"Cerrajería",
+		"Ascensor",
+		"Estructural",
+		"Zonas Comunes",
+		"Otros",
+	}
+)
+
 type Community struct {
 	class.Model
 	ID         string     `db:"id"`
@@ -24,8 +43,10 @@ func NewCommunity() *Community {
 	now := time.Now()
 
 	return &Community{
-		ID:        xid.New().String(),
-		CreatedAt: now,
+		ID:         xid.New().String(),
+		CreatedAt:  now,
+		Categories: []string{},
+		PinnedIDs:  []string{},
 	}
 }
 

@@ -9,6 +9,11 @@ import (
 	"github.com/rs/xid"
 )
 
+const (
+	MEMBERSHIP_DOOR_MAX_LENGTH = 25
+	MEMBERSHIP_DOOR_MIN_LENGTH = 0
+)
+
 type Membership struct {
 	class.Model
 	ID          string     `db:"id"`

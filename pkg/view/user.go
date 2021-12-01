@@ -69,7 +69,7 @@ func (self *UserView) PostProfile(ctx echo.Context) error {
 				Birthday: updatedUser.Birthday,
 			}
 			return ctx.JSON(http.StatusOK, response)
-		case user.ErrInvalidName().Is(err):
+		case user.ErrInvalidName().Is(err), user.ErrInvalidPicture().Is(err):
 			return internal.ExcInvalidRequest.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
@@ -88,8 +88,8 @@ func (self *UserView) PostEmailStart(ctx echo.Context) error {
 		case err == nil:
 			response.ID = newOTP.ID
 			return ctx.JSON(http.StatusOK, response)
-		case otp.ErrAlreadySend().Is(err):
-			return ExcOTPAlreadySend.Cause(err)
+		case otp.ErrAlreadySent().Is(err):
+			return ExcOTPAlreadySent.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
@@ -108,7 +108,7 @@ func (self *UserView) PostEmailEnd(ctx echo.Context) error {
 		case err == nil:
 			response.Email = email
 			return ctx.JSON(http.StatusOK, response)
-		case otp.ErrInvalidOTP().Is(err):
+		case otp.ErrInvalid().Is(err):
 			return internal.ExcInvalidRequest.Cause(err)
 		case otp.ErrMaxAttempts().Is(err):
 			return ExcOTPMaxAttempts.Cause(err)
@@ -133,8 +133,8 @@ func (self *UserView) PostPhoneStart(ctx echo.Context) error {
 		case err == nil:
 			response.ID = newOTP.ID
 			return ctx.JSON(http.StatusOK, response)
-		case otp.ErrAlreadySend().Is(err):
-			return ExcOTPAlreadySend.Cause(err)
+		case otp.ErrAlreadySent().Is(err):
+			return ExcOTPAlreadySent.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
@@ -153,7 +153,7 @@ func (self *UserView) PostPhoneEnd(ctx echo.Context) error {
 		case err == nil:
 			response.Phone = phone
 			return ctx.JSON(http.StatusOK, response)
-		case otp.ErrInvalidOTP().Is(err):
+		case otp.ErrInvalid().Is(err):
 			return internal.ExcInvalidRequest.Cause(err)
 		case otp.ErrMaxAttempts().Is(err):
 			return ExcOTPMaxAttempts.Cause(err)

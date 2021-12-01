@@ -25,7 +25,9 @@ import (
 	"github.com/neoxelox/odin/pkg/repository"
 	"github.com/neoxelox/odin/pkg/service"
 	"github.com/neoxelox/odin/pkg/usecase/auth"
+	"github.com/neoxelox/odin/pkg/usecase/community"
 	"github.com/neoxelox/odin/pkg/usecase/file"
+	"github.com/neoxelox/odin/pkg/usecase/invitation"
 	"github.com/neoxelox/odin/pkg/usecase/otp"
 	"github.com/neoxelox/odin/pkg/usecase/session"
 	"github.com/neoxelox/odin/pkg/usecase/user"
@@ -126,9 +128,9 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	/* REPOSITORIES  */
 
-	_ = repository.NewCommunityRepository(configuration, logger, *database)
-	_ = repository.NewInvitationRepository(configuration, logger, *database)
-	_ = repository.NewMembershipRepository(configuration, logger, *database)
+	communityRepository := repository.NewCommunityRepository(configuration, logger, *database)
+	invitationRepository := repository.NewInvitationRepository(configuration, logger, *database)
+	membershipRepository := repository.NewMembershipRepository(configuration, logger, *database)
 	otpRepository := repository.NewOTPRepository(configuration, logger, *database)
 	_ = repository.NewPostRepository(configuration, logger, *database)
 	sessionRepository := repository.NewSessionRepository(configuration, logger, *database)
@@ -149,6 +151,16 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userUpdater := user.NewUpdaterUsecase(configuration, logger, *database, *userRepository, *otpRepository, *otpVerifier)
 	userDeleter := user.NewDeleterUsecase(configuration, logger, *userRepository)
 
+	communityGetter := community.NewGetterUsecase(configuration, logger, *communityRepository, *membershipRepository)
+	communityJoiner := community.NewJoinerUsecase(configuration, logger, *communityRepository, *membershipRepository)
+	communityLeaver := community.NewLeaverUsecase(configuration, logger, *communityRepository, *membershipRepository)
+	communityCreator := community.NewCreatorUsecase(configuration, logger, *database, *communityJoiner, *communityRepository)
+
+	invitationGetter := invitation.NewGetterUsecase(configuration, logger, *invitationRepository)
+	invitationAccepter := invitation.NewAccepterUsecase(configuration, logger, *database, *communityJoiner, *invitationRepository)
+	invitationRejecter := invitation.NewRejecterUsecase(configuration, logger, *invitationRepository)
+	invitationCreator := invitation.NewCreatorUsecase(configuration, logger, *database, *invitationRepository, *membershipRepository, *userRepository)
+
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
 	authLogger := auth.NewLoggerUsecase(configuration, logger, *database, *otpVerifier, *userCreator,
@@ -160,6 +172,8 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	fileView := view.NewFileView(configuration, logger, *fileCreator, *fileGetter)
 	authView := view.NewAuthView(configuration, logger, *otpCreator, *authLogger)
 	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *userDeleter, *otpCreator)
+	communityView := view.NewCommunityView(configuration, logger, *communityCreator, *communityGetter, *communityLeaver, *invitationCreator)
+	invitationView := view.NewInvitationView(configuration, logger, *invitationGetter, *invitationAccepter, *invitationRejecter)
 
 	/* MIDDLEWARES */
 
@@ -187,6 +201,9 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	api.POST("/login/start", authView.PostLoginStart)
 	api.POST("/login/end", authView.PostLoginEnd)
 
+	// TODO: Refactorize this, discuss whether files and assets should be merged
+	api.GET("/file/:name", fileView.GetFile)
+
 	// VERSIONED
 
 	apiV1 := api.Group("/v1")
@@ -196,7 +213,6 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	api = api.Group("", authMiddleware)
 
 	api.POST("/file", fileView.PostFile, fileLimitMiddleware)
-	api.GET("/file/:name", fileView.GetFile, fileLimitMiddleware)
 	api.POST("/logout", authView.PostLogout)
 
 	// VERSIONED
@@ -210,6 +226,16 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.POST("/user/phone/start", userView.PostPhoneStart)
 	apiV1.POST("/user/phone/end", userView.PostPhoneEnd)
 	apiV1.DELETE("/user", userView.DeleteUser)
+
+	apiV1.GET("/community", communityView.GetCommunityList)
+	apiV1.GET("/community/:id", communityView.GetCommunity)
+	apiV1.POST("/community", communityView.PostCommunity)
+	apiV1.POST("/community/:id/invite", communityView.PostCommunityInvite)
+	apiV1.POST("/community/:id/leave", communityView.PostCommunityLeave)
+
+	apiV1.GET("/invitation", invitationView.GetInvitationList)
+	apiV1.POST("/invitation/:id/accept", invitationView.PostInvitationAccept)
+	apiV1.POST("/invitation/:id/reject", invitationView.PostInvitationReject)
 
 	return &API{
 		API: *class.NewAPI(

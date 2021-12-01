@@ -39,8 +39,8 @@ func (self *AuthView) PostLoginStart(ctx echo.Context) error {
 		case err == nil:
 			response.ID = newOTP.ID
 			return ctx.JSON(http.StatusOK, response)
-		case otp.ErrAlreadySend().Is(err):
-			return ExcOTPAlreadySend.Cause(err)
+		case otp.ErrAlreadySent().Is(err):
+			return ExcOTPAlreadySent.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
@@ -72,7 +72,7 @@ func (self *AuthView) PostLoginEnd(ctx echo.Context) error {
 				}
 			}
 			return ctx.JSON(http.StatusOK, response)
-		case otp.ErrInvalidOTP().Is(err):
+		case otp.ErrInvalid().Is(err):
 			return internal.ExcInvalidRequest.Cause(err)
 		case otp.ErrMaxAttempts().Is(err):
 			return ExcOTPMaxAttempts.Cause(err)

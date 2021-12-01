@@ -9,6 +9,11 @@ import (
 	"github.com/rs/xid"
 )
 
+const (
+	POST_MESSAGE_MAX_LENGTH = 280
+	POST_MESSAGE_MIN_LENGTH = 1
+)
+
 type Post struct {
 	class.Model
 	ID            string    `db:"id"`
@@ -98,8 +103,9 @@ func NewPostHistory() *PostHistory {
 	now := time.Now()
 
 	return &PostHistory{
-		ID:        xid.New().String(),
-		CreatedAt: now,
+		ID:         xid.New().String(),
+		CreatedAt:  now,
+		Categories: []string{},
 	}
 }
 

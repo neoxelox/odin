@@ -47,7 +47,7 @@ func (self *CreatorUsecase) Create(ctx context.Context, asset string, typee stri
 
 	if existingOTP != nil {
 		if time.Now().Before(existingOTP.ExpiresAt) {
-			return nil, ErrAlreadySend()
+			return nil, ErrAlreadySent()
 		}
 
 		err = self.otpRepository.Delete(ctx, existingOTP.ID)

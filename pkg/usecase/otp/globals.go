@@ -8,8 +8,8 @@ const (
 
 var (
 	ErrGeneric     = internal.NewError("OTP execution failed")
-	ErrAlreadySend = internal.NewError("OTP recently sent")
-	ErrInvalidOTP  = internal.NewError("OTP is invalid")
+	ErrInvalid     = internal.NewError("OTP is invalid")
+	ErrAlreadySent = internal.NewError("OTP recently sent")
 	ErrMaxAttempts = internal.NewError("Maximum OTP attempts reached")
 	ErrWrongCode   = internal.NewError("OTP wrong code")
 )

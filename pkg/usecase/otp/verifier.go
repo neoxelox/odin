@@ -34,15 +34,15 @@ func (self *VerifierUsecase) Verify(ctx context.Context, otpID string, code stri
 	}
 
 	if otp == nil {
-		return nil, ErrInvalidOTP()
+		return nil, ErrInvalid()
 	}
 
 	if otp.Type != typee {
-		return nil, ErrInvalidOTP()
+		return nil, ErrInvalid()
 	}
 
 	if time.Now().After(otp.ExpiresAt) {
-		return nil, ErrInvalidOTP()
+		return nil, ErrInvalid()
 	}
 
 	otp.Attempts++

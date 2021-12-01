@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	SMS_MAX_LENGTH int = 160
-	SMS_MIN_LENGTH int = 1
+	SMS_MAX_LENGTH = 160
+	SMS_MIN_LENGTH = 1
 )
 
 var (
