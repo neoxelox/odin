@@ -62,12 +62,23 @@ type GetCommunityListResponse struct {
 	Communities []CommunityAndMembership `json:"communities"`
 }
 
-type GetCommunityUsersRequest struct {
+type GetCommunityUserRequest struct {
+	class.Payload
+	CommunityID  string `param:"community_id" validate:"required"`
+	MembershipID string `param:"membership_id" validate:"required"`
+}
+
+type GetCommunityUserResponse struct {
+	class.Payload
+	UserAndMembership
+}
+
+type GetCommunityUserListRequest struct {
 	class.Payload
 	ID string `param:"id" validate:"required"`
 }
 
-type GetCommunityUsersResponse struct {
+type GetCommunityUserListResponse struct {
 	class.Payload
 	Users []UserAndMembership `json:"users"`
 }

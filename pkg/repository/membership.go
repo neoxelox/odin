@@ -43,6 +43,23 @@ func (self *MembershipRepository) Create(ctx context.Context, membership model.M
 	return &m, nil
 }
 
+func (self *MembershipRepository) GetByID(ctx context.Context, id string) (*model.Membership, error) {
+	var m model.Membership
+
+	query := fmt.Sprintf(`SELECT * FROM "%s"
+						  WHERE "id" = $1;`, MEMBERSHIP_TABLE)
+
+	err := self.Database.Query(ctx, query, id).Scan(&m)
+	switch {
+	case err == nil:
+		return &m, nil
+	case database.ErrNoRows().Is(err):
+		return nil, nil
+	default:
+		return nil, ErrMembershipGeneric().Wrap(err)
+	}
+}
+
 func (self *MembershipRepository) GetByUserAndCommunity(ctx context.Context, userID string, communityID string) (*model.Membership, error) {
 	var m model.Membership
 

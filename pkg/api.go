@@ -241,7 +241,8 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.POST("/invitation/:id/accept", invitationView.PostInvitationAccept)
 	apiV1.POST("/invitation/:id/reject", invitationView.PostInvitationReject)
 
-	apiV1.GET("/community/:id/user", communityView.GetCommunityUsers)
+	apiV1.GET("/community/:id/user", communityView.GetCommunityUserList)
+	apiV1.GET("/community/:community_id/user/:membership_id", communityView.GetCommunityUser)
 
 	apiV1.POST("/community/:id/post", postView.PostPost)
 

@@ -141,10 +141,47 @@ func (self *CommunityView) GetCommunityList(ctx echo.Context) error {
 	})
 }
 
-func (self *CommunityView) GetCommunityUsers(ctx echo.Context) error {
-	request := &payload.GetCommunityUsersRequest{}
+func (self *CommunityView) GetCommunityUser(ctx echo.Context) error {
+	request := &payload.GetCommunityUserRequest{}
 	requestUser := RequestUser(ctx)
-	response := &payload.GetCommunityUsersResponse{Users: []payload.UserAndMembership{}}
+	response := &payload.GetCommunityUserResponse{}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resUser, resMembership, err := self.communityGetter.GetUser(ctx.Request().Context(), *requestUser, request.CommunityID, request.MembershipID)
+		switch {
+		case err == nil:
+			response.User = payload.User{
+				ID:       resUser.ID,
+				Phone:    resUser.Phone,
+				Name:     resUser.Name,
+				Email:    resUser.Email,
+				Picture:  resUser.Picture,
+				Birthday: resUser.Birthday,
+			}
+			response.Membership = payload.Membership{
+				ID:          resMembership.ID,
+				UserID:      resMembership.UserID,
+				CommunityID: resMembership.CommunityID,
+				Door:        resMembership.Door,
+				Role:        resMembership.Role,
+				CreatedAt:   resMembership.CreatedAt,
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case community.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *CommunityView) GetCommunityUserList(ctx echo.Context) error {
+	request := &payload.GetCommunityUserListRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.GetCommunityUserListResponse{Users: []payload.UserAndMembership{}}
 	return self.Handle(ctx, class.Endpoint{
 		Request: request,
 	}, func() error {
@@ -172,6 +209,8 @@ func (self *CommunityView) GetCommunityUsers(ctx echo.Context) error {
 				})
 			}
 			return ctx.JSON(http.StatusOK, response)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}

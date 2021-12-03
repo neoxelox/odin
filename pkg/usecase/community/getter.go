@@ -82,6 +82,45 @@ func (self *GetterUsecase) List(ctx context.Context, user model.User) ([]model.C
 	return communities, memberships, nil
 }
 
+func (self *GetterUsecase) GetUser(ctx context.Context, requester model.User, communityID string, membershipID string) (*model.User, *model.Membership, error) {
+	requesterMembership, err := self.membershipRepository.GetByUserAndCommunity(ctx, requester.ID, communityID)
+	if err != nil {
+		return nil, nil, ErrGeneric().Wrap(err)
+	}
+
+	if requesterMembership == nil || requesterMembership.DeletedAt != nil {
+		return nil, nil, ErrNotBelongs()
+	}
+
+	if requesterMembership.ID == membershipID {
+		return &requester, requesterMembership, nil
+	}
+
+	membership, err := self.membershipRepository.GetByID(ctx, membershipID)
+	if err != nil {
+		return nil, nil, ErrGeneric().Wrap(err)
+	}
+
+	if membership == nil {
+		return nil, nil, ErrNotBelongs()
+	}
+
+	if membership.CommunityID != requesterMembership.CommunityID {
+		return nil, nil, ErrNotBelongs()
+	}
+
+	user, err := self.userRepository.GetByID(ctx, membership.UserID)
+	if err != nil {
+		return nil, nil, ErrGeneric()
+	}
+
+	if user == nil {
+		return nil, nil, ErrInvalid()
+	}
+
+	return user, membership, nil
+}
+
 func (self *GetterUsecase) ListUsers(ctx context.Context, user model.User, communityID string) ([]model.User, []model.Membership, error) {
 	membership, err := self.membershipRepository.GetByUserAndCommunity(ctx, user.ID, communityID)
 	if err != nil {
