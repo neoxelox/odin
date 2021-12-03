@@ -44,9 +44,9 @@ func NewCommunity() *Community {
 
 	return &Community{
 		ID:         xid.New().String(),
-		CreatedAt:  now,
 		Categories: []string{},
 		PinnedIDs:  []string{},
+		CreatedAt:  now,
 	}
 }
 

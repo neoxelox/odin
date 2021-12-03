@@ -12,6 +12,12 @@ import (
 const (
 	POST_MESSAGE_MAX_LENGTH = 280
 	POST_MESSAGE_MIN_LENGTH = 1
+
+	POST_POLL_WIDGET_MAX_OPTIONS = 5
+	POST_POLL_WIDGET_MIN_OPTIONS = 2
+
+	POST_POLL_WIDGET_MAX_OPTION_LENGTH = 100
+	POST_POLL_WIDGET_MIN_OPTION_LENGTH = 1
 )
 
 type Post struct {
@@ -54,17 +60,12 @@ type PostWidgets struct {
 	Poll *map[string][]string
 }
 
-type PostMedia struct {
-	Pictures *[]string
-	Videos   *[]string
-	Audios   *[]string
-}
-
 func NewPost() *Post {
 	now := time.Now()
 
 	return &Post{
 		ID:        xid.New().String(),
+		VoterIDs:  []string{},
 		CreatedAt: now,
 	}
 }
@@ -94,8 +95,8 @@ type PostHistory struct {
 	Message    string      `db:"message"`
 	Categories []string    `db:"categories"`
 	State      *string     `db:"state"`
+	Media      []string    `db:"media"`
 	Widgets    PostWidgets `db:"widgets"`
-	Media      PostMedia   `db:"media"`
 	CreatedAt  time.Time   `db:"created_at"`
 }
 
@@ -104,8 +105,10 @@ func NewPostHistory() *PostHistory {
 
 	return &PostHistory{
 		ID:         xid.New().String(),
-		CreatedAt:  now,
 		Categories: []string{},
+		Media:      []string{},
+		Widgets:    PostWidgets{},
+		CreatedAt:  now,
 	}
 }
 
@@ -123,11 +126,7 @@ func (self *PostHistory) Copy() *PostHistory {
 		Widgets: PostWidgets{
 			Poll: utility.CopyStringSliceMap(self.Widgets.Poll),
 		},
-		Media: PostMedia{
-			Pictures: utility.CopyStringSlice(self.Media.Pictures),
-			Videos:   utility.CopyStringSlice(self.Media.Videos),
-			Audios:   utility.CopyStringSlice(self.Media.Audios),
-		},
+		Media:     *utility.CopyStringSlice(&self.Media),
 		CreatedAt: *utility.CopyTime(&self.CreatedAt),
 	}
 }

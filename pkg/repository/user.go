@@ -69,6 +69,23 @@ func (self *UserRepository) GetByID(ctx context.Context, id string) (*model.User
 	}
 }
 
+func (self *UserRepository) GetByIDs(ctx context.Context, ids []string) ([]model.User, error) {
+	var us []model.User
+
+	query := fmt.Sprintf(`SELECT * FROM "%s"
+						  WHERE "id" = ANY ($1);`, USER_TABLE)
+
+	err := self.Database.Query(ctx, query, ids).Scan(&us)
+	switch {
+	case err == nil:
+		return us, nil
+	case database.ErrNoRows().Is(err):
+		return []model.User{}, nil
+	default:
+		return nil, ErrUserGeneric().Wrap(err)
+	}
+}
+
 func (self *UserRepository) GetByPhone(ctx context.Context, phone string) (*model.User, error) {
 	var u model.User
 

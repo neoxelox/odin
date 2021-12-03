@@ -29,6 +29,7 @@ import (
 	"github.com/neoxelox/odin/pkg/usecase/file"
 	"github.com/neoxelox/odin/pkg/usecase/invitation"
 	"github.com/neoxelox/odin/pkg/usecase/otp"
+	"github.com/neoxelox/odin/pkg/usecase/post"
 	"github.com/neoxelox/odin/pkg/usecase/session"
 	"github.com/neoxelox/odin/pkg/usecase/user"
 	"github.com/neoxelox/odin/pkg/view"
@@ -132,7 +133,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	invitationRepository := repository.NewInvitationRepository(configuration, logger, *database)
 	membershipRepository := repository.NewMembershipRepository(configuration, logger, *database)
 	otpRepository := repository.NewOTPRepository(configuration, logger, *database)
-	_ = repository.NewPostRepository(configuration, logger, *database)
+	postRepository := repository.NewPostRepository(configuration, logger, *database)
 	sessionRepository := repository.NewSessionRepository(configuration, logger, *database)
 	userRepository := repository.NewUserRepository(configuration, logger, *database)
 
@@ -151,7 +152,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userUpdater := user.NewUpdaterUsecase(configuration, logger, *database, *userRepository, *otpRepository, *otpVerifier)
 	userDeleter := user.NewDeleterUsecase(configuration, logger, *userRepository)
 
-	communityGetter := community.NewGetterUsecase(configuration, logger, *communityRepository, *membershipRepository)
+	communityGetter := community.NewGetterUsecase(configuration, logger, *communityRepository, *membershipRepository, *userRepository)
 	communityJoiner := community.NewJoinerUsecase(configuration, logger, *communityRepository, *membershipRepository)
 	communityLeaver := community.NewLeaverUsecase(configuration, logger, *communityRepository, *membershipRepository)
 	communityCreator := community.NewCreatorUsecase(configuration, logger, *database, *communityJoiner, *communityRepository)
@@ -160,6 +161,8 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	invitationAccepter := invitation.NewAccepterUsecase(configuration, logger, *database, *communityJoiner, *invitationRepository)
 	invitationRejecter := invitation.NewRejecterUsecase(configuration, logger, *invitationRepository)
 	invitationCreator := invitation.NewCreatorUsecase(configuration, logger, *database, *invitationRepository, *membershipRepository, *userRepository)
+
+	postCreator := post.NewCreatorUsecase(configuration, logger, *database, *postRepository, *membershipRepository)
 
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
@@ -174,6 +177,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *userDeleter, *otpCreator)
 	communityView := view.NewCommunityView(configuration, logger, *communityCreator, *communityGetter, *communityLeaver, *invitationCreator)
 	invitationView := view.NewInvitationView(configuration, logger, *invitationGetter, *invitationAccepter, *invitationRejecter)
+	postView := view.NewPostView(configuration, logger, *postCreator)
 
 	/* MIDDLEWARES */
 
@@ -236,6 +240,10 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.GET("/invitation", invitationView.GetInvitationList)
 	apiV1.POST("/invitation/:id/accept", invitationView.PostInvitationAccept)
 	apiV1.POST("/invitation/:id/reject", invitationView.PostInvitationReject)
+
+	apiV1.GET("/community/:id/user", communityView.GetCommunityUsers)
+
+	apiV1.POST("/community/:id/post", postView.PostPost)
 
 	return &API{
 		API: *class.NewAPI(

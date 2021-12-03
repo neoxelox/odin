@@ -4,8 +4,8 @@ CREATE TABLE "post_history" (
     "message"       VARCHAR(280) NOT NULL,
     "categories"    VARCHAR(100) ARRAY NOT NULL,
     "state"         VARCHAR(100) NULL,
+    "media"         VARCHAR(100) ARRAY NOT NULL,
     "widgets"       JSONB NOT NULL,
-    "media"         JSONB NOT NULL,
     "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 

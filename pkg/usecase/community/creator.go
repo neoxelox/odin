@@ -29,7 +29,7 @@ func NewCreatorUsecase(configuration internal.Configuration, logger core.Logger,
 	}
 }
 
-func (self *CreatorUsecase) Create(ctx context.Context, address string, name *string, categories *[]string, creator *model.User) (*model.Community, *model.Membership, error) {
+func (self *CreatorUsecase) Create(ctx context.Context, creator *model.User, address string, name *string, categories *[]string) (*model.Community, *model.Membership, error) {
 	community := model.NewCommunity()
 	communityCategories := strset.New()
 

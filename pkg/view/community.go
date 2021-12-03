@@ -39,7 +39,7 @@ func (self *CommunityView) PostCommunity(ctx echo.Context) error {
 	return self.Handle(ctx, class.Endpoint{
 		Request: request,
 	}, func() error {
-		newCommunity, newMembership, err := self.communityCreator.Create(ctx.Request().Context(), request.Address, request.Name, request.Categories, requestUser)
+		newCommunity, newMembership, err := self.communityCreator.Create(ctx.Request().Context(), requestUser, request.Address, request.Name, request.Categories)
 		switch {
 		case err == nil:
 			response.Community = payload.Community{
@@ -123,6 +123,43 @@ func (self *CommunityView) GetCommunityList(ctx echo.Context) error {
 						Categories: resCommunities[i].Categories,
 						PinnedIDs:  resCommunities[i].PinnedIDs,
 						CreatedAt:  resCommunities[i].CreatedAt,
+					},
+					Membership: payload.Membership{
+						ID:          resMemberships[i].ID,
+						UserID:      resMemberships[i].UserID,
+						CommunityID: resMemberships[i].CommunityID,
+						Door:        resMemberships[i].Door,
+						Role:        resMemberships[i].Role,
+						CreatedAt:   resMemberships[i].CreatedAt,
+					},
+				})
+			}
+			return ctx.JSON(http.StatusOK, response)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *CommunityView) GetCommunityUsers(ctx echo.Context) error {
+	request := &payload.GetCommunityUsersRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.GetCommunityUsersResponse{Users: []payload.UserAndMembership{}}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resUsers, resMemberships, err := self.communityGetter.ListUsers(ctx.Request().Context(), *requestUser, request.ID)
+		switch {
+		case err == nil:
+			for i := 0; i < len(resUsers); i++ {
+				response.Users = append(response.Users, payload.UserAndMembership{
+					User: payload.User{
+						ID:       resUsers[i].ID,
+						Phone:    resUsers[i].Phone,
+						Name:     resUsers[i].Name,
+						Email:    resUsers[i].Email,
+						Picture:  resUsers[i].Picture,
+						Birthday: resUsers[i].Birthday,
 					},
 					Membership: payload.Membership{
 						ID:          resMemberships[i].ID,

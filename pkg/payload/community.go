@@ -30,6 +30,11 @@ type CommunityAndMembership struct {
 	Membership Membership `json:"membership"`
 }
 
+type UserAndMembership struct {
+	User       User       `json:"user"`
+	Membership Membership `json:"membership"`
+}
+
 type PostCommunityRequest struct {
 	class.Payload
 	Address    string    `json:"address" validate:"required"`
@@ -55,6 +60,16 @@ type GetCommunityResponse struct {
 type GetCommunityListResponse struct {
 	class.Payload
 	Communities []CommunityAndMembership `json:"communities"`
+}
+
+type GetCommunityUsersRequest struct {
+	class.Payload
+	ID string `param:"id" validate:"required"`
+}
+
+type GetCommunityUsersResponse struct {
+	class.Payload
+	Users []UserAndMembership `json:"users"`
 }
 
 type PostCommunityInviteRequest struct {

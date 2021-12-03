@@ -16,14 +16,16 @@ type GetterUsecase struct {
 	class.Usecase
 	communityRepository  repository.CommunityRepository
 	membershipRepository repository.MembershipRepository
+	userRepository       repository.UserRepository
 }
 
 func NewGetterUsecase(configuration internal.Configuration, logger core.Logger, communityRepository repository.CommunityRepository,
-	membershipRepository repository.MembershipRepository) *GetterUsecase {
+	membershipRepository repository.MembershipRepository, userRepository repository.UserRepository) *GetterUsecase {
 	return &GetterUsecase{
 		Usecase:              *class.NewUsecase(configuration, logger),
 		communityRepository:  communityRepository,
 		membershipRepository: membershipRepository,
+		userRepository:       userRepository,
 	}
 }
 
@@ -54,7 +56,7 @@ func (self *GetterUsecase) Get(ctx context.Context, user model.User, communityID
 }
 
 func (self *GetterUsecase) List(ctx context.Context, user model.User) ([]model.Community, []model.Membership, error) {
-	memberships, err := self.membershipRepository.List(ctx, user.ID)
+	memberships, err := self.membershipRepository.ListByUser(ctx, user.ID)
 	if err != nil {
 		return nil, nil, ErrGeneric().Wrap(err)
 	}
@@ -78,4 +80,40 @@ func (self *GetterUsecase) List(ctx context.Context, user model.User) ([]model.C
 	})
 
 	return communities, memberships, nil
+}
+
+func (self *GetterUsecase) ListUsers(ctx context.Context, user model.User, communityID string) ([]model.User, []model.Membership, error) {
+	membership, err := self.membershipRepository.GetByUserAndCommunity(ctx, user.ID, communityID)
+	if err != nil {
+		return nil, nil, ErrGeneric().Wrap(err)
+	}
+
+	if membership == nil || membership.DeletedAt != nil {
+		return nil, nil, ErrNotBelongs()
+	}
+
+	memberships, err := self.membershipRepository.ListByCommunity(ctx, communityID)
+	if err != nil {
+		return nil, nil, ErrGeneric().Wrap(err)
+	}
+
+	userIDs := []string{}
+	for _, membership := range memberships {
+		userIDs = append(userIDs, membership.UserID)
+	}
+
+	users, err := self.userRepository.GetByIDs(ctx, userIDs)
+	if err != nil {
+		return nil, nil, ErrGeneric().Wrap(err)
+	}
+
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Name < users[j].Name
+	})
+
+	utility.EqualSort(users, memberships, func(i, j int) bool {
+		return users[i].ID == memberships[j].UserID
+	})
+
+	return users, memberships, nil
 }

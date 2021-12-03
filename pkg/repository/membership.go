@@ -60,13 +60,47 @@ func (self *MembershipRepository) GetByUserAndCommunity(ctx context.Context, use
 	}
 }
 
-func (self *MembershipRepository) List(ctx context.Context, userID string) ([]model.Membership, error) {
+func (self *MembershipRepository) GetByIDsAndCommunity(ctx context.Context, ids []string, communityID string) ([]model.Membership, error) {
+	var ms []model.Membership
+
+	query := fmt.Sprintf(`SELECT * FROM "%s"
+						  WHERE "id" = ANY ($1) AND "community_id" = $2;`, MEMBERSHIP_TABLE)
+
+	err := self.Database.Query(ctx, query, ids, communityID).Scan(&ms)
+	switch {
+	case err == nil:
+		return ms, nil
+	case database.ErrNoRows().Is(err):
+		return []model.Membership{}, nil
+	default:
+		return nil, ErrMembershipGeneric().Wrap(err)
+	}
+}
+
+func (self *MembershipRepository) ListByUser(ctx context.Context, userID string) ([]model.Membership, error) {
 	var ms []model.Membership
 
 	query := fmt.Sprintf(`SELECT * FROM "%s"
 						  WHERE "user_id" = $1 AND "deleted_at" IS NULL;`, MEMBERSHIP_TABLE)
 
 	err := self.Database.Query(ctx, query, userID).Scan(&ms)
+	switch {
+	case err == nil:
+		return ms, nil
+	case database.ErrNoRows().Is(err):
+		return []model.Membership{}, nil
+	default:
+		return nil, ErrMembershipGeneric().Wrap(err)
+	}
+}
+
+func (self *MembershipRepository) ListByCommunity(ctx context.Context, communityID string) ([]model.Membership, error) {
+	var ms []model.Membership
+
+	query := fmt.Sprintf(`SELECT * FROM "%s"
+						  WHERE "community_id" = $1 AND "deleted_at" IS NULL;`, MEMBERSHIP_TABLE)
+
+	err := self.Database.Query(ctx, query, communityID).Scan(&ms)
 	switch {
 	case err == nil:
 		return ms, nil
