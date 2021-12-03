@@ -19,16 +19,19 @@ import (
 type CreatorUsecase struct {
 	class.Usecase
 	database      database.Database
+	renderer      core.Renderer
 	otpRepository repository.OTPRepository
 	smsService    service.SMSService
 	emailService  service.EmailService
 }
 
 func NewCreatorUsecase(configuration internal.Configuration, logger core.Logger, database database.Database,
-	otpRepository repository.OTPRepository, smsService service.SMSService, emailService service.EmailService) *CreatorUsecase {
+	renderer core.Renderer, otpRepository repository.OTPRepository, smsService service.SMSService,
+	emailService service.EmailService) *CreatorUsecase {
 	return &CreatorUsecase{
 		Usecase:       *class.NewUsecase(configuration, logger),
 		database:      database,
+		renderer:      renderer,
 		otpRepository: otpRepository,
 		smsService:    smsService,
 		emailService:  emailService,
@@ -86,17 +89,19 @@ func (self *CreatorUsecase) Create(ctx context.Context, asset string, typee stri
 }
 
 func (self *CreatorUsecase) send(ctx context.Context, otp model.OTP) error {
-	message := fmt.Sprintf(OTP_MESSAGE, otp.Code)
-
 	switch otp.Type {
 	case model.OTPType.SMS:
-		err := self.smsService.Send(otp.Asset, message)
+		err := self.smsService.Send(otp.Asset, fmt.Sprintf(OTP_SMS_MESSAGE, otp.Code))
 		if err != nil {
 			return ErrGeneric().Wrap(err)
 		}
 		return nil
 	case model.OTPType.EMAIL:
-		err := self.emailService.Send(otp.Asset, message)
+		body, err := self.renderer.RenderString(OTP_EMAIL_TEMPLATE, otp.Code)
+		if err != nil {
+			return ErrGeneric().Wrap(err)
+		}
+		err = self.emailService.Send(otp.Asset, OTP_EMAIL_SUBJECT, body)
 		if err != nil {
 			return ErrGeneric().Wrap(err)
 		}

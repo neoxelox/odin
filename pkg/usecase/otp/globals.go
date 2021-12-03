@@ -3,7 +3,9 @@ package otp
 import "github.com/neoxelox/odin/internal"
 
 const (
-	OTP_MESSAGE = `Tu código de verificación para Community es: %s. Por favor, nunca compartas este código con nadie.`
+	OTP_SMS_MESSAGE    = `Tu código de verificación para Community es: %s. Por favor, nunca compartas este código con nadie.`
+	OTP_EMAIL_SUBJECT  = "Tu código de verificación para Community"
+	OTP_EMAIL_TEMPLATE = "emails/otp.html"
 )
 
 var (

@@ -59,6 +59,10 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	binder := core.NewBinder(configuration, logger)
 	errorHandler := core.NewErrorHandler(configuration, logger)
 
+	ss, _ := renderer.RenderString("emails/otp.html", nil)
+
+	fmt.Println(ss)
+
 	database, err := database.New(ctx, 5, configuration, logger)
 	if err != nil {
 		return nil, ErrAPIGeneric().Wrap(err)
@@ -142,7 +146,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	fileCreator := file.NewCreatorUsecase(configuration, logger)
 	fileGetter := file.NewGetterUsecase(configuration, logger)
 
-	otpCreator := otp.NewCreatorUsecase(configuration, logger, *database, *otpRepository, *smsService, *emailService)
+	otpCreator := otp.NewCreatorUsecase(configuration, logger, *database, *renderer, *otpRepository, *smsService, *emailService)
 	otpVerifier := otp.NewVerifierUsecase(configuration, logger, *otpRepository)
 
 	sessionCreator := session.NewCreatorUsecase(configuration, logger, *database, *sessionRepository, *userRepository)
