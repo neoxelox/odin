@@ -21,6 +21,7 @@ require (
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.26.0
 	github.com/scylladb/go-set v1.0.2
+	github.com/sendgrid/sendgrid-go v3.10.3+incompatible
 	github.com/twilio/twilio-go v0.18.0
 	github.com/vk-rv/pvx v0.0.0-20210912195928-ac00bc32f6e7
 )
@@ -56,6 +57,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/randallmlough/sqlmaper v0.0.0-20191117174101-7ad100a86097 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
+	github.com/sendgrid/rest v2.6.5+incompatible // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/vmihailenco/go-tinylfu v0.2.2 // indirect

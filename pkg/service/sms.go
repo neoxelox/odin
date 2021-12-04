@@ -59,7 +59,10 @@ func (self *SMSService) Send(receiverPhone string, message string) error {
 	}
 
 	if self.Configuration.Environment == internal.Environment.PRODUCTION {
-		return self.sendReal(receiverPhone, message)
+		go func() {
+			self.Logger.Error(self.sendReal(receiverPhone, message))
+		}()
+		return nil
 	} else {
 		return self.sendFake(receiverPhone, message)
 	}

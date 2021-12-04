@@ -201,7 +201,7 @@ func (self Logger) Error(i ...interface{}) {
 	if self.configuration.Environment == internal.Environment.PRODUCTION {
 		self.logger.Error().Msg(fmt.Sprint(i...))
 	} else {
-		if i != nil {
+		if i != nil && i[0] != nil {
 			if len(i) == 1 {
 				err := i[0].(error)
 				if ierr, ok := i[0].(*internal.Error); ok {

@@ -46,6 +46,10 @@ type Configuration struct {
 	TwilioRegion     string
 	TwilioEdge       string
 
+	SendGridApiKey    string
+	SendGridFromName  string
+	SendGridFromEmail string
+
 	GracefulTimeout      int
 	RequestHeaderMaxSize int
 	RequestBodyMaxSize   int
@@ -86,6 +90,10 @@ func NewConfiguration(override *Configuration) *Configuration {
 		TwilioOriginator: utility.GetEnvAsString("ODIN_TWILIO_ORIGINATOR", "Community"),
 		TwilioRegion:     utility.GetEnvAsString("ODIN_TWILIO_REGION", "de1"),
 		TwilioEdge:       utility.GetEnvAsString("ODIN_TWILIO_EDGE", "frankfurt"),
+
+		SendGridApiKey:    utility.GetEnvAsString("ODIN_SENDGRID_API_KEY", "fake"),
+		SendGridFromName:  utility.GetEnvAsString("ODIN_SENDGRID_FROM_NAME", "fake"),
+		SendGridFromEmail: utility.GetEnvAsString("ODIN_SENDGRID_FROM_EMAIL", "fake"),
 
 		GracefulTimeout:      15,      // 15 S
 		RequestHeaderMaxSize: 1 << 10, // 1 KB
