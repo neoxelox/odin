@@ -58,7 +58,7 @@ func (self *SMSService) Send(receiverPhone string, message string) error {
 		return ErrSMSInvalidPhone()
 	}
 
-	if self.Configuration.Environment == internal.Environment.PRODUCTION {
+	if self.Configuration.Environment == internal.Environment.PRODUCTION && self.Configuration.ServiceSMSEnabled {
 		go func() {
 			self.Logger.Error(self.sendReal(receiverPhone, message))
 		}()

@@ -37,6 +37,10 @@ type Configuration struct {
 	AppOrigins []string
 	AppName    string
 
+	ServiceSMSEnabled   bool
+	ServiceEmailEnabled bool
+	ServicePushEnabled  bool
+
 	TwilioBaseURL    string
 	TwilioAccountSID string
 	TwilioApiKey     string
@@ -81,6 +85,10 @@ func NewConfiguration(override *Configuration) *Configuration {
 		AppRelease: utility.GetEnvAsString("ODIN_RELEASE", "fake"),
 		AppOrigins: utility.GetEnvAsSlice("ODIN_ORIGINS", []string{"http://localhost:1111"}),
 		AppName:    "odin",
+
+		ServiceSMSEnabled:   utility.GetEnvAsBool("ODIN_SERVICE_SMS_ENABLED", false),
+		ServiceEmailEnabled: utility.GetEnvAsBool("ODIN_SERVICE_EMAIL_ENABLED", false),
+		ServicePushEnabled:  utility.GetEnvAsBool("ODIN_SERVICE_PUSH_ENABLED", false),
 
 		TwilioBaseURL:    utility.GetEnvAsString("ODIN_TWILIO_BASE_URL", "https://api.twilio.com/2010-04-01"),
 		TwilioAccountSID: utility.GetEnvAsString("ODIN_TWILIO_ACCOUNT_SID", "fake"),

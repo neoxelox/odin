@@ -33,7 +33,7 @@ func (self *PushService) Send(receiverSubscription string, message string) error
 		return ErrPushInvalidMessage()
 	}
 
-	if self.Configuration.Environment == internal.Environment.PRODUCTION {
+	if self.Configuration.Environment == internal.Environment.PRODUCTION && self.Configuration.ServicePushEnabled {
 		return self.sendReal(receiverSubscription, message)
 	} else {
 		return self.sendFake(receiverSubscription, message)

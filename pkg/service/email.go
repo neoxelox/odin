@@ -45,7 +45,7 @@ func (self *EmailService) Send(receiverEmail string, subject string, body string
 		return ErrEmailInvalid().Wrap(err)
 	}
 
-	if self.Configuration.Environment == internal.Environment.PRODUCTION {
+	if self.Configuration.Environment == internal.Environment.PRODUCTION && self.Configuration.ServiceEmailEnabled {
 		go func() {
 			self.Logger.Error(self.sendReal(receiverEmail, subject, body))
 		}()

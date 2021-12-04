@@ -66,6 +66,8 @@ func (self *CreatorUsecase) Create(ctx context.Context, asset string, typee stri
 	otp.Code = strings.ToUpper(*utility.RandomString(model.OTP_CODE_LENGTH))
 	if self.Configuration.Environment == internal.Environment.DEVELOPMENT {
 		otp.Code = "123456"
+	} else { // TODO: Temporary DELETE!!
+		otp.Code = "DM5FJH"
 	}
 
 	err = self.database.Transaction(ctx, func(ctx context.Context) error {
