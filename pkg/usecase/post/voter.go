@@ -56,7 +56,14 @@ func (self *VoterUsecase) Vote(ctx context.Context, voter model.User, communityI
 
 	post.VoterIDs = voterIDs.List()
 
-	err = self.postRepository.UpdateVoters(ctx, post.ID, post.VoterIDs)
+	if post.Type == model.PostType.ISSUE {
+		(*post.Priority)++
+
+		err = self.postRepository.UpdateVotersAndPriority(ctx, post.ID, post.VoterIDs, *post.Priority)
+	} else {
+		err = self.postRepository.UpdateVoters(ctx, post.ID, post.VoterIDs)
+	}
+
 	if err != nil {
 		return nil, nil, ErrGeneric().Wrap(err)
 	}

@@ -188,6 +188,23 @@ func (self *PostRepository) UpdateVoters(ctx context.Context, id string, voterID
 	return nil
 }
 
+func (self *PostRepository) UpdateVotersAndPriority(ctx context.Context, id string, voterIDs []string, priority int) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "voter_ids" = $1, "priority" = $2
+						  WHERE "id" = $3;`, POST_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, voterIDs, priority, id)
+	if err != nil {
+		return ErrPostGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrPostGeneric()
+	}
+
+	return nil
+}
+
 func (self *PostRepository) UpdateWidgets(ctx context.Context, historyID string, widgets model.PostWidgets) error {
 	query := fmt.Sprintf(`UPDATE "%s"
 						  SET "widgets" = $1
