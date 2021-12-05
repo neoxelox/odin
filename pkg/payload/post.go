@@ -91,3 +91,15 @@ type PostUnvotePostResponse struct {
 	class.Payload
 	Post
 }
+
+type PostVotePostPollRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+	Option      string `json:"option" validate:"required"`
+}
+
+type PostVotePostPollResponse struct {
+	class.Payload
+	Post
+}

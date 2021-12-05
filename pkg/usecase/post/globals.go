@@ -13,4 +13,5 @@ var (
 	ErrInvalidState      = internal.NewError("Issue state invalid")
 	ErrInvalidMedia      = internal.NewError("Post media invalid")
 	ErrInvalidPoll       = internal.NewError("Publication poll widget invalid")
+	ErrAlreadyVoted      = internal.NewError("User already voted")
 )

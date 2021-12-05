@@ -17,6 +17,7 @@ var (
 	ExcUserNotBelongs     = internal.NewException(http.StatusForbidden, "ERR_USER_NOT_BELONGS")
 	ExcUserNotPermission  = internal.NewException(http.StatusForbidden, "ERR_USER_NOT_PERMISSION")
 	ExcUserAlreadyInvited = internal.NewException(http.StatusForbidden, "ERR_USER_ALREADY_INVITED")
+	ExcUserAlreadyVoted   = internal.NewException(http.StatusForbidden, "ERR_USER_ALREADY_VOTED")
 )
 
 func RequestSession(ctx echo.Context) *model.Session {

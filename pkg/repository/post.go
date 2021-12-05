@@ -187,3 +187,20 @@ func (self *PostRepository) UpdateVoters(ctx context.Context, id string, voterID
 
 	return nil
 }
+
+func (self *PostRepository) UpdateWidgets(ctx context.Context, historyID string, widgets model.PostWidgets) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "widgets" = $1
+						  WHERE "id" = $2;`, POST_HISTORY_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, widgets, historyID)
+	if err != nil {
+		return ErrPostGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrPostGeneric()
+	}
+
+	return nil
+}
