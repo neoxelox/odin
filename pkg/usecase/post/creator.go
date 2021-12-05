@@ -8,6 +8,7 @@ import (
 	"github.com/neoxelox/odin/internal/class"
 	"github.com/neoxelox/odin/internal/core"
 	"github.com/neoxelox/odin/internal/database"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/neoxelox/odin/pkg/model"
 	"github.com/neoxelox/odin/pkg/repository"
 	"github.com/neoxelox/odin/pkg/usecase/community"
@@ -105,6 +106,10 @@ func (self *CreatorUsecase) createPublication(ctx context.Context, creator model
 
 		if thread == nil {
 			return nil, nil, ErrInvalidThread()
+		}
+
+		if !utility.EqualStringSlice(thread.RecipientIDs, recipientIDs) {
+			return nil, nil, ErrInvalidRecipients()
 		}
 	}
 
