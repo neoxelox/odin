@@ -22,10 +22,18 @@ func NewGetterUsecase(configuration internal.Configuration, logger core.Logger, 
 	}
 }
 
-func (self *GetterUsecase) Get(ctx context.Context, id string) (*model.User, error) {
+func (self *GetterUsecase) Get(ctx context.Context, requester model.User, id string) (*model.User, error) {
+	if requester.ID == id {
+		return &requester, nil
+	}
+
 	user, err := self.userRepository.GetByID(ctx, id)
-	if err != nil || user == nil {
+	if err != nil {
 		return nil, ErrGeneric().Wrap(err)
+	}
+
+	if user == nil {
+		return nil, ErrInvalid()
 	}
 
 	return user, nil

@@ -91,32 +91,20 @@ func (self *PostRepository) GetByID(ctx context.Context, id string) (*model.Post
 	}
 }
 
-func (self *PostRepository) GetByIDHistory(ctx context.Context, id string) (*model.Post, []model.PostHistory, error) {
-	var p model.Post
+func (self *PostRepository) GetHistory(ctx context.Context, id string) ([]model.PostHistory, error) {
 	var hs []model.PostHistory
 
 	query := fmt.Sprintf(`SELECT * FROM "%s"
-						  WHERE "id" = $1;`, POST_TABLE)
+						  WHERE "post_id" = $1;`, POST_HISTORY_TABLE)
 
-	err := self.Database.Query(ctx, query, id).Scan(&p)
-	switch {
-	case database.ErrNoRows().Is(err):
-		return nil, []model.PostHistory{}, nil
-	case err != nil:
-		return nil, nil, ErrPostGeneric().Wrap(err)
-	}
-
-	query = fmt.Sprintf(`SELECT * FROM "%s"
-						 WHERE "post_id" = $1;`, POST_HISTORY_TABLE)
-
-	err = self.Database.Query(ctx, query, p.ID).Scan(&hs)
+	err := self.Database.Query(ctx, query, id).Scan(&hs)
 	switch {
 	case err == nil:
-		return &p, hs, nil
+		return hs, nil
 	case database.ErrNoRows().Is(err):
-		return &p, []model.PostHistory{}, nil
+		return []model.PostHistory{}, nil
 	default:
-		return nil, nil, ErrPostGeneric().Wrap(err)
+		return nil, ErrPostGeneric().Wrap(err)
 	}
 }
 

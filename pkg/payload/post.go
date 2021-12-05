@@ -31,6 +31,39 @@ type PostHistory struct {
 	CreatedAt  time.Time   `json:"created_at,omitempty"`
 }
 
+type GetPostRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+}
+
+type GetPostResponse struct {
+	class.Payload
+	Post
+}
+
+type GetPostHistoryRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+}
+
+type GetPostHistoryResponse struct {
+	class.Payload
+	History []PostHistory `json:"history"`
+}
+
+type GetPostThreadRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+}
+
+type GetPostThreadResponse struct {
+	class.Payload
+	Thread []Post `json:"thread"`
+}
+
 type PostPostRequest struct {
 	class.Payload
 	CommunityID  string    `param:"id" validate:"required"`

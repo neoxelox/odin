@@ -111,6 +111,12 @@ func (self *CreatorUsecase) createPublication(ctx context.Context, creator model
 		if !utility.EqualStringSlice(thread.RecipientIDs, recipientIDs) {
 			return nil, nil, ErrInvalidRecipients()
 		}
+
+		if thread.CreatorID != creator.ID && thread.RecipientIDs != nil {
+			if !utility.StringIn(creator.ID, *thread.RecipientIDs) {
+				return nil, nil, community.ErrNotPermission()
+			}
+		}
 	}
 
 	var pollWidget map[string][]string

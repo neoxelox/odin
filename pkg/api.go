@@ -162,6 +162,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	invitationRejecter := invitation.NewRejecterUsecase(configuration, logger, *invitationRepository)
 	invitationCreator := invitation.NewCreatorUsecase(configuration, logger, *database, *invitationRepository, *membershipRepository, *userRepository)
 
+	postGetter := post.NewGetterUsecase(configuration, logger, *postRepository, *membershipRepository)
 	postCreator := post.NewCreatorUsecase(configuration, logger, *database, *postRepository, *membershipRepository)
 	postUpdater := post.NewUpdaterUsecase(configuration, logger, *database, *postRepository, *membershipRepository)
 	postVoter := post.NewVoterUsecase(configuration, logger, *postRepository, *membershipRepository)
@@ -183,7 +184,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *userDeleter, *otpCreator)
 	communityView := view.NewCommunityView(configuration, logger, *communityCreator, *communityGetter, *communityLeaver, *invitationCreator)
 	invitationView := view.NewInvitationView(configuration, logger, *invitationGetter, *invitationAccepter, *invitationRejecter)
-	postView := view.NewPostView(configuration, logger, *postCreator, *postUpdater, *postVoter, *postUnvoter, *postPollVoter, *postPinner, *postUnpinner)
+	postView := view.NewPostView(configuration, logger, *postGetter, *postCreator, *postUpdater, *postVoter, *postUnvoter, *postPollVoter, *postPinner, *postUnpinner)
 
 	/* MIDDLEWARES */
 
@@ -250,6 +251,9 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.GET("/community/:id/user", communityView.GetCommunityUserList)
 	apiV1.GET("/community/:community_id/user/:membership_id", communityView.GetCommunityUser)
 
+	apiV1.GET("/community/:community_id/post/:post_id", postView.GetPost)
+	apiV1.GET("/community/:community_id/post/:post_id/history", postView.GetPostHistory)
+	apiV1.GET("/community/:community_id/post/:post_id/thread", postView.GetPostThread)
 	apiV1.POST("/community/:id/post", postView.PostPost)
 	apiV1.PUT("/community/:community_id/post/:post_id", postView.PutPost)
 	apiV1.POST("/community/:community_id/post/:post_id/vote", postView.PostVotePost)

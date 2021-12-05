@@ -14,6 +14,7 @@ import (
 
 type PostView struct {
 	class.View
+	postGetter    post.GetterUsecase
 	postCreator   post.CreatorUsecase
 	postUpdater   post.UpdaterUsecase
 	postVoter     post.VoterUsecase
@@ -23,11 +24,13 @@ type PostView struct {
 	postUnpinner  post.UnpinnerUsecase
 }
 
-func NewPostView(configuration internal.Configuration, logger core.Logger, postCreator post.CreatorUsecase,
-	postUpdater post.UpdaterUsecase, postVoter post.VoterUsecase, postUnvoter post.UnvoterUsecase,
-	postPollVoter post.PollVoterUsecase, postPinner post.PinnerUsecase, postUnpinner post.UnpinnerUsecase) *PostView {
+func NewPostView(configuration internal.Configuration, logger core.Logger, postGetter post.GetterUsecase,
+	postCreator post.CreatorUsecase, postUpdater post.UpdaterUsecase, postVoter post.VoterUsecase,
+	postUnvoter post.UnvoterUsecase, postPollVoter post.PollVoterUsecase, postPinner post.PinnerUsecase,
+	postUnpinner post.UnpinnerUsecase) *PostView {
 	return &PostView{
 		View:          *class.NewView(configuration, logger),
+		postGetter:    postGetter,
 		postCreator:   postCreator,
 		postUpdater:   postUpdater,
 		postVoter:     postVoter,
@@ -36,6 +39,127 @@ func NewPostView(configuration internal.Configuration, logger core.Logger, postC
 		postPinner:    postPinner,
 		postUnpinner:  postUnpinner,
 	}
+}
+
+func (self *PostView) GetPost(ctx echo.Context) error {
+	request := &payload.GetPostRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.GetPostResponse{}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resPost, resHistory, err := self.postGetter.Get(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID)
+		switch {
+		case err == nil:
+			response.Post = payload.Post{
+				ID:           resPost.ID,
+				ThreadID:     resPost.ThreadID,
+				CreatorID:    resPost.CreatorID,
+				Type:         resPost.Type,
+				Priority:     resPost.Priority,
+				RecipientIDs: resPost.RecipientIDs,
+				VoterIDs:     resPost.VoterIDs,
+				CreatedAt:    resPost.CreatedAt,
+				PostHistory: payload.PostHistory{
+					Message:    resHistory.Message,
+					Categories: resHistory.Categories,
+					State:      resHistory.State,
+					Media:      resHistory.Media,
+					Widgets: payload.PostWidgets{
+						Poll: resHistory.Widgets.Poll,
+					},
+				},
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case post.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		case community.ErrNotPermission().Is(err):
+			return ExcUserNotPermission.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *PostView) GetPostHistory(ctx echo.Context) error {
+	request := &payload.GetPostHistoryRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.GetPostHistoryResponse{History: []payload.PostHistory{}}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resHistories, err := self.postGetter.GetHistory(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID)
+		switch {
+		case err == nil:
+			for _, resHistory := range resHistories {
+				response.History = append(response.History, payload.PostHistory{
+					Message:    resHistory.Message,
+					Categories: resHistory.Categories,
+					State:      resHistory.State,
+					Media:      resHistory.Media,
+					Widgets: payload.PostWidgets{
+						Poll: resHistory.Widgets.Poll,
+					},
+					CreatedAt: resHistory.CreatedAt,
+				})
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case post.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		case community.ErrNotPermission().Is(err):
+			return ExcUserNotPermission.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *PostView) GetPostThread(ctx echo.Context) error {
+	request := &payload.GetPostThreadRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.GetPostThreadResponse{Thread: []payload.Post{}}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resPosts, resHistories, err := self.postGetter.GetThread(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID)
+		switch {
+		case err == nil:
+			for i := 0; i < len(resPosts); i++ {
+				response.Thread = append(response.Thread, payload.Post{
+					ID:           resPosts[i].ID,
+					ThreadID:     resPosts[i].ThreadID,
+					CreatorID:    resPosts[i].CreatorID,
+					Type:         resPosts[i].Type,
+					Priority:     resPosts[i].Priority,
+					RecipientIDs: resPosts[i].RecipientIDs,
+					VoterIDs:     resPosts[i].VoterIDs,
+					CreatedAt:    resPosts[i].CreatedAt,
+					PostHistory: payload.PostHistory{
+						Message:    resHistories[i].Message,
+						Categories: resHistories[i].Categories,
+						State:      resHistories[i].State,
+						Media:      resHistories[i].Media,
+						Widgets: payload.PostWidgets{
+							Poll: resHistories[i].Widgets.Poll,
+						},
+					},
+				})
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case post.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		case community.ErrNotPermission().Is(err):
+			return ExcUserNotPermission.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
 }
 
 func (self *PostView) PostPost(ctx echo.Context) error {
@@ -79,6 +203,8 @@ func (self *PostView) PostPost(ctx echo.Context) error {
 			return internal.ExcInvalidRequest.Cause(err)
 		case community.ErrNotBelongs().Is(err):
 			return ExcUserNotBelongs.Cause(err)
+		case community.ErrNotPermission().Is(err):
+			return ExcUserNotPermission.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}

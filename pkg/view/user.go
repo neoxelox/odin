@@ -36,16 +36,23 @@ func (self *UserView) GetProfile(ctx echo.Context) error {
 	requestUser := RequestUser(ctx)
 	response := &payload.PostUserProfileResponse{}
 	return self.Handle(ctx, class.Endpoint{}, func() error {
-		response.User = payload.User{
-			ID:       requestUser.ID,
-			Phone:    requestUser.Phone,
-			Name:     requestUser.Name,
-			Email:    requestUser.Email,
-			Picture:  requestUser.Picture,
-			Birthday: requestUser.Birthday,
+		resUser, err := self.userGetter.Get(ctx.Request().Context(), *requestUser, requestUser.ID)
+		switch {
+		case err == nil:
+			response.User = payload.User{
+				ID:       resUser.ID,
+				Phone:    resUser.Phone,
+				Name:     resUser.Name,
+				Email:    resUser.Email,
+				Picture:  resUser.Picture,
+				Birthday: resUser.Birthday,
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case user.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
 		}
-
-		return ctx.JSON(http.StatusOK, response)
 	})
 }
 
