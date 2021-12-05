@@ -163,6 +163,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	invitationCreator := invitation.NewCreatorUsecase(configuration, logger, *database, *invitationRepository, *membershipRepository, *userRepository)
 
 	postCreator := post.NewCreatorUsecase(configuration, logger, *database, *postRepository, *membershipRepository)
+	postUpdater := post.NewUpdaterUsecase(configuration, logger, *database, *postRepository, *membershipRepository)
 
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
@@ -177,7 +178,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *userDeleter, *otpCreator)
 	communityView := view.NewCommunityView(configuration, logger, *communityCreator, *communityGetter, *communityLeaver, *invitationCreator)
 	invitationView := view.NewInvitationView(configuration, logger, *invitationGetter, *invitationAccepter, *invitationRejecter)
-	postView := view.NewPostView(configuration, logger, *postCreator)
+	postView := view.NewPostView(configuration, logger, *postCreator, *postUpdater)
 
 	/* MIDDLEWARES */
 
@@ -245,6 +246,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.GET("/community/:community_id/user/:membership_id", communityView.GetCommunityUser)
 
 	apiV1.POST("/community/:id/post", postView.PostPost)
+	apiV1.PUT("/community/:community_id/post/:post_id", postView.PutPost)
 
 	return &API{
 		API: *class.NewAPI(

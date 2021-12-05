@@ -51,3 +51,21 @@ type PostPostResponse struct {
 	class.Payload
 	Post
 }
+
+type PutPostRequest struct {
+	class.Payload
+	CommunityID string    `param:"community_id" validate:"required"`
+	PostID      string    `param:"post_id" validate:"required"`
+	Message     *string   `json:"message" validate:"omitempty,required"`
+	Categories  *[]string `json:"categories" validate:"omitempty,required"`
+	State       *string   `json:"state" validate:"omitempty,required"`
+	Media       *[]string `json:"media" validate:"omitempty,required"`
+	Widgets     *struct {
+		PollOptions *[]string `json:"poll_options" validate:"omitempty,required"`
+	} `json:"widgets" validate:"omitempty,required"`
+}
+
+type PutPostResponse struct {
+	class.Payload
+	Post
+}

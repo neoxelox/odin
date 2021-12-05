@@ -8,18 +8,21 @@ import (
 	"github.com/neoxelox/odin/internal/class"
 	"github.com/neoxelox/odin/internal/core"
 	"github.com/neoxelox/odin/pkg/payload"
+	"github.com/neoxelox/odin/pkg/usecase/community"
 	"github.com/neoxelox/odin/pkg/usecase/post"
 )
 
 type PostView struct {
 	class.View
 	postCreator post.CreatorUsecase
+	postUpdater post.UpdaterUsecase
 }
 
-func NewPostView(configuration internal.Configuration, logger core.Logger, postCreator post.CreatorUsecase) *PostView {
+func NewPostView(configuration internal.Configuration, logger core.Logger, postCreator post.CreatorUsecase, postUpdater post.UpdaterUsecase) *PostView {
 	return &PostView{
 		View:        *class.NewView(configuration, logger),
 		postCreator: postCreator,
+		postUpdater: postUpdater,
 	}
 }
 
@@ -62,6 +65,56 @@ func (self *PostView) PostPost(ctx echo.Context) error {
 			post.ErrInvalidPriority().Is(err), post.ErrInvalidRecipients().Is(err), post.ErrInvalidMessage().Is(err),
 			post.ErrInvalidState().Is(err), post.ErrInvalidMedia().Is(err), post.ErrInvalidPoll().Is(err):
 			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *PostView) PutPost(ctx echo.Context) error {
+	request := &payload.PutPostRequest{
+		Widgets: &struct { // WTF Golang...?
+			PollOptions *[]string "json:\"poll_options\" validate:\"omitempty,required\""
+		}{},
+	}
+	requestUser := RequestUser(ctx)
+	response := &payload.PutPostResponse{}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		updatedPost, updatedHistory, err := self.postUpdater.Update(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID, request.Message, request.Categories,
+			request.State, request.Media, request.Widgets.PollOptions)
+		switch {
+		case err == nil:
+			response.Post = payload.Post{
+				ID:           updatedPost.ID,
+				ThreadID:     updatedPost.ThreadID,
+				CreatorID:    updatedPost.CreatorID,
+				Type:         updatedPost.Type,
+				Priority:     updatedPost.Priority,
+				RecipientIDs: updatedPost.RecipientIDs,
+				VoterIDs:     updatedPost.VoterIDs,
+				CreatedAt:    updatedPost.CreatedAt,
+				PostHistory: payload.PostHistory{
+					Message:    updatedHistory.Message,
+					Categories: updatedHistory.Categories,
+					State:      updatedHistory.State,
+					Media:      updatedHistory.Media,
+					Widgets: payload.PostWidgets{
+						Poll: updatedHistory.Widgets.Poll,
+					},
+				},
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case post.ErrInvalid().Is(err), post.ErrInvalidType().Is(err), post.ErrInvalidMessage().Is(err),
+			post.ErrInvalidState().Is(err), post.ErrInvalidMedia().Is(err), post.ErrInvalidPoll().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		case community.ErrNotPermission().Is(err):
+			return ExcUserNotPermission.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}
