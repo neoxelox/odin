@@ -75,3 +75,20 @@ func (self *CommunityRepository) GetByIDs(ctx context.Context, ids []string) ([]
 		return nil, ErrCommunityGeneric().Wrap(err)
 	}
 }
+
+func (self *CommunityRepository) UpdatePinned(ctx context.Context, id string, pinnedIDs []string) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "pinned_ids" = $1
+						  WHERE "id" = $2;`, COMMUNITY_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, pinnedIDs, id)
+	if err != nil {
+		return ErrCommunityGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrCommunityGeneric()
+	}
+
+	return nil
+}

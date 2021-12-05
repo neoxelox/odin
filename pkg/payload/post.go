@@ -103,3 +103,25 @@ type PostVotePostPollResponse struct {
 	class.Payload
 	Post
 }
+
+type PostPinPostRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+}
+
+type PostPinPostResponse struct {
+	class.Payload
+	Community
+}
+
+type PostUnpinPostRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+}
+
+type PostUnpinPostResponse struct {
+	class.Payload
+	Community
+}

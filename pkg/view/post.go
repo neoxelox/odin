@@ -19,11 +19,13 @@ type PostView struct {
 	postVoter     post.VoterUsecase
 	postUnvoter   post.UnvoterUsecase
 	postPollVoter post.PollVoterUsecase
+	postPinner    post.PinnerUsecase
+	postUnpinner  post.UnpinnerUsecase
 }
 
 func NewPostView(configuration internal.Configuration, logger core.Logger, postCreator post.CreatorUsecase,
 	postUpdater post.UpdaterUsecase, postVoter post.VoterUsecase, postUnvoter post.UnvoterUsecase,
-	postPollVoter post.PollVoterUsecase) *PostView {
+	postPollVoter post.PollVoterUsecase, postPinner post.PinnerUsecase, postUnpinner post.UnpinnerUsecase) *PostView {
 	return &PostView{
 		View:          *class.NewView(configuration, logger),
 		postCreator:   postCreator,
@@ -31,6 +33,8 @@ func NewPostView(configuration internal.Configuration, logger core.Logger, postC
 		postVoter:     postVoter,
 		postUnvoter:   postUnvoter,
 		postPollVoter: postPollVoter,
+		postPinner:    postPinner,
+		postUnpinner:  postUnpinner,
 	}
 }
 
@@ -245,6 +249,68 @@ func (self *PostView) PostVotePostPoll(ctx echo.Context) error {
 			return ExcUserNotBelongs.Cause(err)
 		case post.ErrAlreadyVoted().Is(err):
 			return ExcUserAlreadyVoted.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *PostView) PostPinPost(ctx echo.Context) error {
+	request := &payload.PostPinPostRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.PostPinPostResponse{}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resCommunity, err := self.postPinner.Pin(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID)
+		switch {
+		case err == nil:
+			response.Community = payload.Community{
+				ID:         resCommunity.ID,
+				Address:    resCommunity.Address,
+				Name:       resCommunity.Name,
+				Categories: resCommunity.Categories,
+				PinnedIDs:  resCommunity.PinnedIDs,
+				CreatedAt:  resCommunity.CreatedAt,
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case community.ErrInvalid().Is(err), post.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		case community.ErrNotPermission().Is(err):
+			return ExcUserNotPermission.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *PostView) PostUnpinPost(ctx echo.Context) error {
+	request := &payload.PostUnpinPostRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.PostUnpinPostResponse{}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resCommunity, err := self.postUnpinner.Unpin(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID)
+		switch {
+		case err == nil:
+			response.Community = payload.Community{
+				ID:         resCommunity.ID,
+				Address:    resCommunity.Address,
+				Name:       resCommunity.Name,
+				Categories: resCommunity.Categories,
+				PinnedIDs:  resCommunity.PinnedIDs,
+				CreatedAt:  resCommunity.CreatedAt,
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case community.ErrInvalid().Is(err), post.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		case community.ErrNotPermission().Is(err):
+			return ExcUserNotPermission.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}

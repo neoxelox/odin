@@ -167,6 +167,8 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	postVoter := post.NewVoterUsecase(configuration, logger, *postRepository, *membershipRepository)
 	postUnvoter := post.NewUnvoterUsecase(configuration, logger, *postRepository, *membershipRepository)
 	postPollVoter := post.NewPollVoterUsecase(configuration, logger, *postRepository, *membershipRepository)
+	postPinner := post.NewPinnerUsecase(configuration, logger, *postRepository, *membershipRepository, *communityRepository)
+	postUnpinner := post.NewUnpinnerUsecase(configuration, logger, *postRepository, *membershipRepository, *communityRepository)
 
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
@@ -181,7 +183,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *userDeleter, *otpCreator)
 	communityView := view.NewCommunityView(configuration, logger, *communityCreator, *communityGetter, *communityLeaver, *invitationCreator)
 	invitationView := view.NewInvitationView(configuration, logger, *invitationGetter, *invitationAccepter, *invitationRejecter)
-	postView := view.NewPostView(configuration, logger, *postCreator, *postUpdater, *postVoter, *postUnvoter, *postPollVoter)
+	postView := view.NewPostView(configuration, logger, *postCreator, *postUpdater, *postVoter, *postUnvoter, *postPollVoter, *postPinner, *postUnpinner)
 
 	/* MIDDLEWARES */
 
@@ -253,6 +255,8 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.POST("/community/:community_id/post/:post_id/vote", postView.PostVotePost)
 	apiV1.POST("/community/:community_id/post/:post_id/unvote", postView.PostUnvotePost)
 	apiV1.POST("/community/:community_id/post/:post_id/widget/poll/vote", postView.PostVotePostPoll)
+	apiV1.POST("/community/:community_id/post/:post_id/pin", postView.PostPinPost)
+	apiV1.POST("/community/:community_id/post/:post_id/unpin", postView.PostUnpinPost)
 
 	return &API{
 		API: *class.NewAPI(
