@@ -170,3 +170,20 @@ func (self *PostRepository) UpdateHistory(ctx context.Context, id string, histor
 
 	return nil
 }
+
+func (self *PostRepository) UpdateVoters(ctx context.Context, id string, voterIDs []string) error {
+	query := fmt.Sprintf(`UPDATE "%s"
+						  SET "voter_ids" = $1
+						  WHERE "id" = $2;`, POST_TABLE)
+
+	affected, err := self.Database.Exec(ctx, query, voterIDs, id)
+	if err != nil {
+		return ErrPostGeneric().Wrap(err)
+	}
+
+	if affected != 1 {
+		return ErrPostGeneric()
+	}
+
+	return nil
+}

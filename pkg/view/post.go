@@ -16,13 +16,18 @@ type PostView struct {
 	class.View
 	postCreator post.CreatorUsecase
 	postUpdater post.UpdaterUsecase
+	postVoter   post.VoterUsecase
+	postUnvoter post.UnvoterUsecase
 }
 
-func NewPostView(configuration internal.Configuration, logger core.Logger, postCreator post.CreatorUsecase, postUpdater post.UpdaterUsecase) *PostView {
+func NewPostView(configuration internal.Configuration, logger core.Logger, postCreator post.CreatorUsecase,
+	postUpdater post.UpdaterUsecase, postVoter post.VoterUsecase, postUnvoter post.UnvoterUsecase) *PostView {
 	return &PostView{
 		View:        *class.NewView(configuration, logger),
 		postCreator: postCreator,
 		postUpdater: postUpdater,
+		postVoter:   postVoter,
+		postUnvoter: postUnvoter,
 	}
 }
 
@@ -115,6 +120,86 @@ func (self *PostView) PutPost(ctx echo.Context) error {
 			return ExcUserNotBelongs.Cause(err)
 		case community.ErrNotPermission().Is(err):
 			return ExcUserNotPermission.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *PostView) PostVotePost(ctx echo.Context) error {
+	request := &payload.PostVotePostRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.PostVotePostResponse{}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resPost, resHistory, err := self.postVoter.Vote(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID)
+		switch {
+		case err == nil:
+			response.Post = payload.Post{
+				ID:           resPost.ID,
+				ThreadID:     resPost.ThreadID,
+				CreatorID:    resPost.CreatorID,
+				Type:         resPost.Type,
+				Priority:     resPost.Priority,
+				RecipientIDs: resPost.RecipientIDs,
+				VoterIDs:     resPost.VoterIDs,
+				CreatedAt:    resPost.CreatedAt,
+				PostHistory: payload.PostHistory{
+					Message:    resHistory.Message,
+					Categories: resHistory.Categories,
+					State:      resHistory.State,
+					Media:      resHistory.Media,
+					Widgets: payload.PostWidgets{
+						Poll: resHistory.Widgets.Poll,
+					},
+				},
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case post.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
+func (self *PostView) PostUnvotePost(ctx echo.Context) error {
+	request := &payload.PostUnvotePostRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.PostUnvotePostResponse{}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resPost, resHistory, err := self.postUnvoter.Unvote(ctx.Request().Context(), *requestUser, request.CommunityID, request.PostID)
+		switch {
+		case err == nil:
+			response.Post = payload.Post{
+				ID:           resPost.ID,
+				ThreadID:     resPost.ThreadID,
+				CreatorID:    resPost.CreatorID,
+				Type:         resPost.Type,
+				Priority:     resPost.Priority,
+				RecipientIDs: resPost.RecipientIDs,
+				VoterIDs:     resPost.VoterIDs,
+				CreatedAt:    resPost.CreatedAt,
+				PostHistory: payload.PostHistory{
+					Message:    resHistory.Message,
+					Categories: resHistory.Categories,
+					State:      resHistory.State,
+					Media:      resHistory.Media,
+					Widgets: payload.PostWidgets{
+						Poll: resHistory.Widgets.Poll,
+					},
+				},
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case post.ErrInvalid().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
 		default:
 			return internal.ExcServerGeneric.Cause(err)
 		}

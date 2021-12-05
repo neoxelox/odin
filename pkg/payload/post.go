@@ -69,3 +69,25 @@ type PutPostResponse struct {
 	class.Payload
 	Post
 }
+
+type PostVotePostRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+}
+
+type PostVotePostResponse struct {
+	class.Payload
+	Post
+}
+
+type PostUnvotePostRequest struct {
+	class.Payload
+	CommunityID string `param:"community_id" validate:"required"`
+	PostID      string `param:"post_id" validate:"required"`
+}
+
+type PostUnvotePostResponse struct {
+	class.Payload
+	Post
+}
