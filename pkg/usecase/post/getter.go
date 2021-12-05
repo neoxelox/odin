@@ -137,3 +137,35 @@ func (self *GetterUsecase) GetThread(ctx context.Context, requester model.User, 
 
 	return posts, histories, nil
 }
+
+func (self *GetterUsecase) List(ctx context.Context, requester model.User, communityID string, typee *string) ([]model.Post, []model.PostHistory, error) {
+	if typee != nil {
+		if !model.PostType.Has(*typee) {
+			return nil, nil, ErrInvalidType()
+		}
+	}
+
+	requesterMembership, err := self.membershipRepository.GetByUserAndCommunity(ctx, requester.ID, communityID)
+	if err != nil {
+		return nil, nil, ErrGeneric().Wrap(err)
+	}
+
+	if requesterMembership == nil || requester.DeletedAt != nil {
+		return nil, nil, community.ErrNotBelongs()
+	}
+
+	posts, histories, err := self.postRepository.ListByCommunityID(ctx, communityID, typee)
+	if err != nil {
+		return nil, nil, ErrGeneric().Wrap(err)
+	}
+
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].CreatedAt.Before(posts[j].CreatedAt)
+	})
+
+	utility.EqualSort(posts, histories, func(i, j int) bool {
+		return *posts[i].LastHistoryID == histories[j].ID
+	})
+
+	return posts, histories, nil
+}

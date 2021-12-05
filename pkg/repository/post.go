@@ -108,6 +108,52 @@ func (self *PostRepository) GetHistory(ctx context.Context, id string) ([]model.
 	}
 }
 
+// TODO: ADD LOTS OF FILTER AND ORDER PARAMS
+// TODO: DISCUSS WHETHER HAVING COMMUNITY_ID DIRECTLY ON THE POST IN ORDER TO AVOID JOINING TABLES...
+// TODO: USE A QUERY BUILDER, MYGOD...
+func (self *PostRepository) ListByCommunityID(ctx context.Context, communityID string, typee *string) ([]model.Post, []model.PostHistory, error) {
+	var err error
+	var ps []model.Post
+	var hs []model.PostHistory
+
+	query := fmt.Sprintf(`SELECT "post".* FROM "%s" as "post"
+						  INNER JOIN "%s" as "membership" ON "post"."creator_id" = "membership"."id"
+						  WHERE "membership"."community_id" = $1 AND "post"."thread_id" is NULL`, POST_TABLE, MEMBERSHIP_TABLE)
+
+	if typee != nil {
+		query = fmt.Sprintf(`%s AND "post"."type" = $2;`, query)
+		err = self.Database.Query(ctx, query, communityID, typee).Scan(&ps)
+	} else {
+		query = query + ";"
+		err = self.Database.Query(ctx, query, communityID).Scan(&ps)
+	}
+
+	switch {
+	case database.ErrNoRows().Is(err):
+		return []model.Post{}, []model.PostHistory{}, nil
+	case err != nil:
+		return nil, nil, ErrPostGeneric().Wrap(err)
+	}
+
+	historyIDs := []string{}
+	for _, post := range ps {
+		historyIDs = append(historyIDs, *post.LastHistoryID)
+	}
+
+	query = fmt.Sprintf(`SELECT * FROM "%s"
+						 WHERE "id" = ANY ($1);`, POST_HISTORY_TABLE)
+
+	err = self.Database.Query(ctx, query, historyIDs).Scan(&hs)
+	switch {
+	case err == nil:
+		return ps, hs, nil
+	case database.ErrNoRows().Is(err):
+		return ps, []model.PostHistory{}, nil
+	default:
+		return nil, nil, ErrPostGeneric().Wrap(err)
+	}
+}
+
 func (self *PostRepository) ListByThreadID(ctx context.Context, threadID string) ([]model.Post, []model.PostHistory, error) {
 	var ps []model.Post
 	var hs []model.PostHistory

@@ -64,6 +64,17 @@ type GetPostThreadResponse struct {
 	Thread []Post `json:"thread"`
 }
 
+type GetPostListRequest struct {
+	class.Payload
+	CommunityID string  `param:"id" validate:"required"`
+	Type        *string `query:"type" validate:"omitempty,required"`
+}
+
+type GetPostListResponse struct {
+	class.Payload
+	Posts []Post `json:"posts"`
+}
+
 type PostPostRequest struct {
 	class.Payload
 	CommunityID  string    `param:"id" validate:"required"`

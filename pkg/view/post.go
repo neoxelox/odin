@@ -162,6 +162,48 @@ func (self *PostView) GetPostThread(ctx echo.Context) error {
 	})
 }
 
+func (self *PostView) GetPostList(ctx echo.Context) error {
+	request := &payload.GetPostListRequest{}
+	requestUser := RequestUser(ctx)
+	response := &payload.GetPostListResponse{Posts: []payload.Post{}}
+	return self.Handle(ctx, class.Endpoint{
+		Request: request,
+	}, func() error {
+		resPosts, resHistories, err := self.postGetter.List(ctx.Request().Context(), *requestUser, request.CommunityID, request.Type)
+		switch {
+		case err == nil:
+			for i := 0; i < len(resPosts); i++ {
+				response.Posts = append(response.Posts, payload.Post{
+					ID:           resPosts[i].ID,
+					ThreadID:     resPosts[i].ThreadID,
+					CreatorID:    resPosts[i].CreatorID,
+					Type:         resPosts[i].Type,
+					Priority:     resPosts[i].Priority,
+					RecipientIDs: resPosts[i].RecipientIDs,
+					VoterIDs:     resPosts[i].VoterIDs,
+					CreatedAt:    resPosts[i].CreatedAt,
+					PostHistory: payload.PostHistory{
+						Message:    resHistories[i].Message,
+						Categories: resHistories[i].Categories,
+						State:      resHistories[i].State,
+						Media:      resHistories[i].Media,
+						Widgets: payload.PostWidgets{
+							Poll: resHistories[i].Widgets.Poll,
+						},
+					},
+				})
+			}
+			return ctx.JSON(http.StatusOK, response)
+		case post.ErrInvalid().Is(err), post.ErrInvalidType().Is(err):
+			return internal.ExcInvalidRequest.Cause(err)
+		case community.ErrNotBelongs().Is(err):
+			return ExcUserNotBelongs.Cause(err)
+		default:
+			return internal.ExcServerGeneric.Cause(err)
+		}
+	})
+}
+
 func (self *PostView) PostPost(ctx echo.Context) error {
 	request := &payload.PostPostRequest{
 		Widgets: &struct { // WTF Golang...?

@@ -251,6 +251,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	apiV1.GET("/community/:id/user", communityView.GetCommunityUserList)
 	apiV1.GET("/community/:community_id/user/:membership_id", communityView.GetCommunityUser)
 
+	apiV1.GET("/community/:id/post", postView.GetPostList)
 	apiV1.GET("/community/:community_id/post/:post_id", postView.GetPost)
 	apiV1.GET("/community/:community_id/post/:post_id/history", postView.GetPostHistory)
 	apiV1.GET("/community/:community_id/post/:post_id/thread", postView.GetPostThread)
