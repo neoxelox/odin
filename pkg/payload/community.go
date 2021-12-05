@@ -26,8 +26,8 @@ type Membership struct {
 }
 
 type CommunityAndMembership struct {
-	Community  Community  `json:"community"`
-	Membership Membership `json:"membership"`
+	Community  Community   `json:"community"`
+	Membership *Membership `json:"membership,omitempty"`
 }
 
 type UserAndMembership struct {

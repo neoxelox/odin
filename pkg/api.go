@@ -152,7 +152,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userUpdater := user.NewUpdaterUsecase(configuration, logger, *database, *userRepository, *otpRepository, *otpVerifier)
 	userDeleter := user.NewDeleterUsecase(configuration, logger, *userRepository)
 
-	communityGetter := community.NewGetterUsecase(configuration, logger, *communityRepository, *membershipRepository, *userRepository)
+	communityGetter := community.NewGetterUsecase(configuration, logger, *communityRepository, *membershipRepository, *userRepository, *invitationRepository)
 	communityJoiner := community.NewJoinerUsecase(configuration, logger, *communityRepository, *membershipRepository)
 	communityLeaver := community.NewLeaverUsecase(configuration, logger, *communityRepository, *membershipRepository)
 	communityCreator := community.NewCreatorUsecase(configuration, logger, *database, *communityJoiner, *communityRepository)

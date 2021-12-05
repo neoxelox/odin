@@ -50,7 +50,7 @@ func (self *CommunityView) PostCommunity(ctx echo.Context) error {
 				PinnedIDs:  newCommunity.PinnedIDs,
 				CreatedAt:  newCommunity.CreatedAt,
 			}
-			response.Membership = payload.Membership{
+			response.Membership = &payload.Membership{
 				ID:          newMembership.ID,
 				UserID:      newMembership.UserID,
 				CommunityID: newMembership.CommunityID,
@@ -88,13 +88,15 @@ func (self *CommunityView) GetCommunity(ctx echo.Context) error {
 				PinnedIDs:  resCommunity.PinnedIDs,
 				CreatedAt:  resCommunity.CreatedAt,
 			}
-			response.Membership = payload.Membership{
-				ID:          resMembership.ID,
-				UserID:      resMembership.UserID,
-				CommunityID: resMembership.CommunityID,
-				Door:        resMembership.Door,
-				Role:        resMembership.Role,
-				CreatedAt:   resMembership.CreatedAt,
+			if resMembership != nil {
+				response.Membership = &payload.Membership{
+					ID:          resMembership.ID,
+					UserID:      resMembership.UserID,
+					CommunityID: resMembership.CommunityID,
+					Door:        resMembership.Door,
+					Role:        resMembership.Role,
+					CreatedAt:   resMembership.CreatedAt,
+				}
 			}
 			return ctx.JSON(http.StatusOK, response)
 		case community.ErrInvalid().Is(err):
@@ -124,7 +126,7 @@ func (self *CommunityView) GetCommunityList(ctx echo.Context) error {
 						PinnedIDs:  resCommunities[i].PinnedIDs,
 						CreatedAt:  resCommunities[i].CreatedAt,
 					},
-					Membership: payload.Membership{
+					Membership: &payload.Membership{
 						ID:          resMemberships[i].ID,
 						UserID:      resMemberships[i].UserID,
 						CommunityID: resMemberships[i].CommunityID,

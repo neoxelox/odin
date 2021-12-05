@@ -17,15 +17,17 @@ type GetterUsecase struct {
 	communityRepository  repository.CommunityRepository
 	membershipRepository repository.MembershipRepository
 	userRepository       repository.UserRepository
+	invitationRepository repository.InvitationRepository
 }
 
 func NewGetterUsecase(configuration internal.Configuration, logger core.Logger, communityRepository repository.CommunityRepository,
-	membershipRepository repository.MembershipRepository, userRepository repository.UserRepository) *GetterUsecase {
+	membershipRepository repository.MembershipRepository, userRepository repository.UserRepository, invitationRepository repository.InvitationRepository) *GetterUsecase {
 	return &GetterUsecase{
 		Usecase:              *class.NewUsecase(configuration, logger),
 		communityRepository:  communityRepository,
 		membershipRepository: membershipRepository,
 		userRepository:       userRepository,
+		invitationRepository: invitationRepository,
 	}
 }
 
@@ -45,7 +47,17 @@ func (self *GetterUsecase) Get(ctx context.Context, user model.User, communityID
 	}
 
 	if membership == nil {
-		return nil, nil, ErrNotBelongs()
+		invitation, err := self.invitationRepository.GetByPhone(ctx, user.Phone)
+		if err != nil {
+			return nil, nil, ErrGeneric().Wrap(err)
+		}
+
+		if invitation == nil {
+			return nil, nil, ErrNotBelongs()
+		} else {
+			return community, nil, nil
+		}
+		// TODO: Discuss whether we should if the invitation is expired here
 	}
 
 	if membership.DeletedAt != nil {
