@@ -3,7 +3,7 @@ CREATE TABLE "user" (
     "phone"             VARCHAR(100) NOT NULL,
     "name"              VARCHAR(100) NOT NULL,
     "email"             VARCHAR(100) NOT NULL,
-    "picture"           VARCHAR(100) NOT NULL,
+    "picture"           VARCHAR(1000) NOT NULL, -- TODO: Decrease max chars to 100 TOC
     "birthday"          DATE NOT NULL,
     "language"          VARCHAR(2) NOT NULL,
     "last_session_id"   VARCHAR(20) NULL,

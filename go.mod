@@ -16,6 +16,7 @@ require (
 	github.com/jackc/pgx/v4 v4.13.0
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/labstack/gommon v0.3.0
+	github.com/mkideal/cli v0.2.7
 	github.com/nyaruka/phonenumbers v1.0.73
 	github.com/randallmlough/pgxscan v0.3.0
 	github.com/rs/xid v1.3.0
@@ -54,6 +55,7 @@ require (
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mkideal/expr v0.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/randallmlough/sqlmaper v0.0.0-20191117174101-7ad100a86097 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
@@ -69,6 +71,7 @@ require (
 	golang.org/x/net v0.0.0-20211013171255-e13a2654a71e // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c // indirect
+	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

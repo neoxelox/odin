@@ -14,7 +14,7 @@ import (
 const (
 	USER_NAME_MAX_LENGTH = 100
 	USER_NAME_MIN_LENGTH = 1
-	USER_DEFAULT_PICTURE = "https://eu.ui-avatars.com/api/?name=%s?size=128"
+	USER_DEFAULT_PICTURE = "https://eu.ui-avatars.com/api/?name=%s&size=128"
 )
 
 type User struct {

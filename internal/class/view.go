@@ -27,7 +27,7 @@ func NewView(configuration internal.Configuration, logger core.Logger) *View {
 	}
 }
 
-type Handler func() error
+type ViewHandler func() error
 
 type KeyFunc func(ctx echo.Context) string
 
@@ -39,7 +39,7 @@ type Endpoint struct {
 	RatelimitRate string
 }
 
-func (self *View) Handle(ctx echo.Context, endpoint Endpoint, handler Handler) error {
+func (self *View) Handle(ctx echo.Context, endpoint Endpoint, handler ViewHandler) error {
 	if endpoint.Request != nil {
 		err := ctx.Bind(endpoint.Request)
 		if err != nil {
