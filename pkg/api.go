@@ -105,11 +105,11 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 		CSPReportOnly:         false,
 		ReferrerPolicy:        "same-origin",
 	})
-	_ = echoMiddleware.GzipWithConfig(echoMiddleware.GzipConfig{
+	gzipMiddleware := echoMiddleware.GzipWithConfig(echoMiddleware.GzipConfig{
 		Skipper: func(c echo.Context) bool { // TODO: Refactorize this!
 			return strings.HasPrefix(c.Path(), "/file") || strings.HasPrefix(c.Path(), strings.TrimPrefix(internal.ASSETS_PATH, "."))
 		},
-		Level: 5,
+		Level: 6,
 	})
 	timeoutMiddleware := echoMiddleware.TimeoutWithConfig(echoMiddleware.TimeoutConfig{
 		Timeout:                    time.Duration(configuration.GracefulTimeout*2/3) * time.Second,
@@ -202,7 +202,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	api.Use(corsMiddleware)
 	api.Use(bodyLimitMiddleware)
 	api.Use(secureMiddleware)
-	// api.Use(gzipMiddleware) // TODO: Reenable
+	api.Use(gzipMiddleware)
 	api.Use(timeoutMiddleware)
 
 	// NOT AUTHENTICATED

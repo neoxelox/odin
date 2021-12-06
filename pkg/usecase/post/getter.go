@@ -160,7 +160,7 @@ func (self *GetterUsecase) List(ctx context.Context, requester model.User, commu
 	}
 
 	sort.Slice(posts, func(i, j int) bool {
-		return posts[i].CreatedAt.Before(posts[j].CreatedAt)
+		return posts[i].CreatedAt.After(posts[j].CreatedAt)
 	})
 
 	utility.EqualSort(posts, histories, func(i, j int) bool {
