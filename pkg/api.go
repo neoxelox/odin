@@ -184,7 +184,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	userView := view.NewUserView(configuration, logger, *userGetter, *userUpdater, *userDeleter, *otpCreator)
 	communityView := view.NewCommunityView(configuration, logger, *communityCreator, *communityGetter, *communityLeaver, *invitationCreator)
 	invitationView := view.NewInvitationView(configuration, logger, *invitationGetter, *invitationAccepter, *invitationRejecter)
-	postView := view.NewPostView(configuration, logger, *postGetter, *postCreator, *postUpdater, *postVoter, *postUnvoter, *postPollVoter, *postPinner, *postUnpinner)
+	postView := view.NewPostView(configuration, logger, *postGetter, *postCreator, *postUpdater, *postVoter, *postUnvoter, *postPollVoter, *postPinner, *postUnpinner, *postRepository)
 
 	/* MIDDLEWARES */
 

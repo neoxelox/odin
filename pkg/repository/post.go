@@ -108,6 +108,23 @@ func (self *PostRepository) GetHistory(ctx context.Context, id string) ([]model.
 	}
 }
 
+func (self *PostRepository) GetSubposts(ctx context.Context, id string) (int, error) {
+	var s int
+
+	query := fmt.Sprintf(`SELECT COUNT(*) FROM "%s"
+						  WHERE "thread_id" = $1;`, POST_TABLE)
+
+	err := self.Database.Query(ctx, query, id).Scan(&s)
+	switch {
+	case err == nil:
+		return s, nil
+	case database.ErrNoRows().Is(err):
+		return 0, nil
+	default:
+		return 0, ErrPostGeneric().Wrap(err)
+	}
+}
+
 // TODO: ADD LOTS OF FILTER AND ORDER PARAMS
 // TODO: DISCUSS WHETHER HAVING COMMUNITY_ID DIRECTLY ON THE POST IN ORDER TO AVOID JOINING TABLES...
 // TODO: USE A QUERY BUILDER, MYGOD...

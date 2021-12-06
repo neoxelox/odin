@@ -7,37 +7,41 @@ import (
 	"github.com/neoxelox/odin/internal"
 	"github.com/neoxelox/odin/internal/class"
 	"github.com/neoxelox/odin/internal/core"
+	"github.com/neoxelox/odin/internal/utility"
 	"github.com/neoxelox/odin/pkg/payload"
+	"github.com/neoxelox/odin/pkg/repository"
 	"github.com/neoxelox/odin/pkg/usecase/community"
 	"github.com/neoxelox/odin/pkg/usecase/post"
 )
 
 type PostView struct {
 	class.View
-	postGetter    post.GetterUsecase
-	postCreator   post.CreatorUsecase
-	postUpdater   post.UpdaterUsecase
-	postVoter     post.VoterUsecase
-	postUnvoter   post.UnvoterUsecase
-	postPollVoter post.PollVoterUsecase
-	postPinner    post.PinnerUsecase
-	postUnpinner  post.UnpinnerUsecase
+	postGetter     post.GetterUsecase
+	postCreator    post.CreatorUsecase
+	postUpdater    post.UpdaterUsecase
+	postVoter      post.VoterUsecase
+	postUnvoter    post.UnvoterUsecase
+	postPollVoter  post.PollVoterUsecase
+	postPinner     post.PinnerUsecase
+	postUnpinner   post.UnpinnerUsecase
+	postRepository repository.PostRepository // TODO: Refactorize this sh*t
 }
 
 func NewPostView(configuration internal.Configuration, logger core.Logger, postGetter post.GetterUsecase,
 	postCreator post.CreatorUsecase, postUpdater post.UpdaterUsecase, postVoter post.VoterUsecase,
 	postUnvoter post.UnvoterUsecase, postPollVoter post.PollVoterUsecase, postPinner post.PinnerUsecase,
-	postUnpinner post.UnpinnerUsecase) *PostView {
+	postUnpinner post.UnpinnerUsecase, postRepository repository.PostRepository) *PostView {
 	return &PostView{
-		View:          *class.NewView(configuration, logger),
-		postGetter:    postGetter,
-		postCreator:   postCreator,
-		postUpdater:   postUpdater,
-		postVoter:     postVoter,
-		postUnvoter:   postUnvoter,
-		postPollVoter: postPollVoter,
-		postPinner:    postPinner,
-		postUnpinner:  postUnpinner,
+		View:           *class.NewView(configuration, logger),
+		postGetter:     postGetter,
+		postCreator:    postCreator,
+		postUpdater:    postUpdater,
+		postVoter:      postVoter,
+		postUnvoter:    postUnvoter,
+		postPollVoter:  postPollVoter,
+		postPinner:     postPinner,
+		postUnpinner:   postUnpinner,
+		postRepository: postRepository,
 	}
 }
 
@@ -59,6 +63,7 @@ func (self *PostView) GetPost(ctx echo.Context) error {
 				Priority:     resPost.Priority,
 				RecipientIDs: resPost.RecipientIDs,
 				VoterIDs:     resPost.VoterIDs,
+				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
 					Message:    resHistory.Message,
@@ -137,6 +142,7 @@ func (self *PostView) GetPostThread(ctx echo.Context) error {
 					Priority:     resPosts[i].Priority,
 					RecipientIDs: resPosts[i].RecipientIDs,
 					VoterIDs:     resPosts[i].VoterIDs,
+					Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPosts[i].ID)), // TODO: Refactorize this sh*t
 					CreatedAt:    resPosts[i].CreatedAt,
 					PostHistory: payload.PostHistory{
 						Message:    resHistories[i].Message,
@@ -181,6 +187,7 @@ func (self *PostView) GetPostList(ctx echo.Context) error {
 					Priority:     resPosts[i].Priority,
 					RecipientIDs: resPosts[i].RecipientIDs,
 					VoterIDs:     resPosts[i].VoterIDs,
+					Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPosts[i].ID)), // TODO: Refactorize this sh*t
 					CreatedAt:    resPosts[i].CreatedAt,
 					PostHistory: payload.PostHistory{
 						Message:    resHistories[i].Message,
@@ -227,6 +234,7 @@ func (self *PostView) PostPost(ctx echo.Context) error {
 				Priority:     newPost.Priority,
 				RecipientIDs: newPost.RecipientIDs,
 				VoterIDs:     newPost.VoterIDs,
+				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), newPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    newPost.CreatedAt,
 				PostHistory: payload.PostHistory{
 					Message:    newHistory.Message,
@@ -276,6 +284,7 @@ func (self *PostView) PutPost(ctx echo.Context) error {
 				Priority:     updatedPost.Priority,
 				RecipientIDs: updatedPost.RecipientIDs,
 				VoterIDs:     updatedPost.VoterIDs,
+				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), updatedPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    updatedPost.CreatedAt,
 				PostHistory: payload.PostHistory{
 					Message:    updatedHistory.Message,
@@ -319,6 +328,7 @@ func (self *PostView) PostVotePost(ctx echo.Context) error {
 				Priority:     resPost.Priority,
 				RecipientIDs: resPost.RecipientIDs,
 				VoterIDs:     resPost.VoterIDs,
+				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
 					Message:    resHistory.Message,
@@ -359,6 +369,7 @@ func (self *PostView) PostUnvotePost(ctx echo.Context) error {
 				Priority:     resPost.Priority,
 				RecipientIDs: resPost.RecipientIDs,
 				VoterIDs:     resPost.VoterIDs,
+				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
 					Message:    resHistory.Message,
@@ -399,6 +410,7 @@ func (self *PostView) PostVotePostPoll(ctx echo.Context) error {
 				Priority:     resPost.Priority,
 				RecipientIDs: resPost.RecipientIDs,
 				VoterIDs:     resPost.VoterIDs,
+				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
 					Message:    resHistory.Message,

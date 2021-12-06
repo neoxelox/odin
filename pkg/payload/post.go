@@ -14,6 +14,7 @@ type Post struct {
 	Priority     *int      `json:"priority"`
 	RecipientIDs *[]string `json:"recipient_ids"`
 	VoterIDs     []string  `json:"voter_ids"`
+	Subposts     int       `json:"subposts"`
 	CreatedAt    time.Time `json:"created_at"`
 	PostHistory
 }
