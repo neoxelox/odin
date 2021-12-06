@@ -69,22 +69,22 @@ VALUES ('9bsv0s65sclg02m57a20', '9bsv0s2l1bfg034l8so0', '9bsv0s5a5rsg02purd40', 
 
 const posts = `
 INSERT INTO "post" ("id", "thread_id", "creator_id", "last_history_id", "type", "priority", "recipient_ids", "voter_ids", "created_at")
-VALUES ('9bsv0s2u84o002rhqpa0', null, '9bsv0s65sclg02m57a2g', 'TODO', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a30, 9bsv0s65sclg02m57a3g}', current_timestamp - interval '13 days' - interval '2 hours'),
-       ('9bsv0s6k1b9g02sp84c0', '9bsv0s2u84o002rhqpa0', '9bsv0s65sclg02m57a3g', 'TODO', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a2g}', current_timestamp - interval '13 days' - interval '1 hour'),
-       ('9bsv0s2r0u8g02qj5ai0', '9bsv0s2u84o002rhqpa0', '9bsv0s65sclg02m57a40', 'TODO', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a2g}', current_timestamp - interval '13 days'),
-       ('9bsv0s2tchag02t6gg10', null, '9bsv0s65sclg02m57a8g', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '11 days' - interval '5 hour'),
-       ('9bsv0s09onsg02s5c8ag', '9bsv0s2tchag02t6gg10', '9bsv0s65sclg02m57a7g', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '11 days' - interval '3 hour'),
-       ('9bsv0s2ccr9g02gl6r50', '9bsv0s2tchag02t6gg10', '9bsv0s65sclg02m57a9g', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '11 days' - interval '4 hour' - interval '32 minutes'),
-       ('9bsv0s4ilem002n1msv0', null, '9bsv0s65sclg02m57ab0', 'TODO', 'ISSUE', '9', null, '{9bsv0s65sclg02m57a9g, 9bsv0s65sclg02m57a80, 9bsv0s65sclg02m57a60, 9bsv0s65sclg02m57a50}', current_timestamp - interval '9 day' + interval '3 hours'),
-       ('9bsv0s4ilem002n1msvg', '9bsv0s4ilem002n1msv0', '9bsv0s65sclg02m57abg', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '9 days' + interval '5 hour' - interval '47 minutes'),
-       ('9bsv0s4ilem002n1mt00', null, '9bsv0s65sclg02m57a40', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '8 days' - interval '7 hour' - interval '02 minutes'),
-       ('9bsv0s4ilem002n1mt0g', null, '9bsv0s65sclg02m57ab0', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '8 days' - interval '1 hour' - interval '05 minutes'),
-       ('9bsv0s4ilem002n1mt10', null, '9bsv0s65sclg02m57a2g', 'TODO', 'ISSUE', '7', null, '{9bsv0s65sclg02m57a80, 9bsv0s65sclg02m57a50}', current_timestamp - interval '6 day' - interval '2 hours' - interval '56 minutes'),
-       ('9bsv0s4ilem002n1mt1g', '9bsv0s4ilem002n1mt10', '9bsv0s65sclg02m57a50', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '6 days' - interval '1 hour' - interval '13 minutes'),
-       ('9bsv0s4ilem002n1mt20', null, '9bsv0s65sclg02m57a4g', 'TODO', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a60, 9bsv0s65sclg02m57a6g, 9bsv0s65sclg02m57a70, 9bsv0s65sclg02m57a7g, 9bsv0s65sclg02m57a80, 9bsv0s65sclg02m57a8g, 9bsv0s65sclg02m57a90, 9bsv0s65sclg02m57a9g, 9bsv0s65sclg02m57aa0, 9bsv0s65sclg02m57aag}', current_timestamp - interval '2 days' - interval '7 hour' - interval '41 minutes'),
-       ('9bsv0s4ilem002n1mt2g', '9bsv0s4ilem002n1mt20', '9bsv0s65sclg02m57a6g', 'TODO', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a4g}', current_timestamp - interval '6 days' + interval '1 hour' - interval '13 minutes'),
-       ('9bsv0s4ilem002n1mt30', '9bsv0s4ilem002n1mt2g', '9bsv0s65sclg02m57a4g', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '6 days' + interval '1 hour' - interval '26 minutes'),
-       ('9bsv0s4ilem002n1mt3g', '9bsv0s4ilem002n1mt20', '9bsv0s65sclg02m57a9g', 'TODO', 'PUBLICATION', null, null, '{}', current_timestamp - interval '6 days' + interval '5 hour' - interval '49 minutes')
+VALUES ('9bsv0s2u84o002rhqpa0', null, '9bsv0s65sclg02m57a2g', '9bsv0s4ilem002n1mt40', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a30, 9bsv0s65sclg02m57a3g}', current_timestamp - interval '13 days' - interval '2 hours'),
+       ('9bsv0s6k1b9g02sp84c0', '9bsv0s2u84o002rhqpa0', '9bsv0s65sclg02m57a3g', '9bsv0s4ilem002n1mt4g', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a2g}', current_timestamp - interval '13 days' - interval '1 hour'),
+       ('9bsv0s2r0u8g02qj5ai0', '9bsv0s2u84o002rhqpa0', '9bsv0s65sclg02m57a40', '9bsv0s4ilem002n1mt50', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a2g}', current_timestamp - interval '13 days'),
+       ('9bsv0s2tchag02t6gg10', null, '9bsv0s65sclg02m57a8g', '9bsv0s4ilem002n1mt5g', 'PUBLICATION', null, null, '{}', current_timestamp - interval '11 days' - interval '5 hour'),
+       ('9bsv0s09onsg02s5c8ag', '9bsv0s2tchag02t6gg10', '9bsv0s65sclg02m57a7g', '9bsv0s4ilem002n1mt60', 'PUBLICATION', null, null, '{}', current_timestamp - interval '11 days' - interval '3 hour'),
+       ('9bsv0s2ccr9g02gl6r50', '9bsv0s2tchag02t6gg10', '9bsv0s65sclg02m57a9g', '9bsv0s4ilem002n1mt6g', 'PUBLICATION', null, null, '{}', current_timestamp - interval '11 days' - interval '4 hour' - interval '32 minutes'),
+       ('9bsv0s4ilem002n1msv0', null, '9bsv0s65sclg02m57ab0', '9bsv0s4ilem002n1mt70', 'ISSUE', '9', null, '{9bsv0s65sclg02m57a9g, 9bsv0s65sclg02m57a80, 9bsv0s65sclg02m57a60, 9bsv0s65sclg02m57a50}', current_timestamp - interval '9 day' + interval '3 hours'),
+       ('9bsv0s4ilem002n1msvg', '9bsv0s4ilem002n1msv0', '9bsv0s65sclg02m57abg', '9bsv0s4ilem002n1mt7g', 'PUBLICATION', null, null, '{}', current_timestamp - interval '9 days' + interval '5 hour' - interval '47 minutes'),
+       ('9bsv0s4ilem002n1mt00', null, '9bsv0s65sclg02m57a40', '9bsv0s4ilem002n1mt80', 'PUBLICATION', null, null, '{}', current_timestamp - interval '8 days' - interval '7 hour' - interval '02 minutes'),
+       ('9bsv0s4ilem002n1mt0g', null, '9bsv0s65sclg02m57ab0', '9bsv0s4ilem002n1mt8g', 'PUBLICATION', null, null, '{}', current_timestamp - interval '8 days' - interval '1 hour' - interval '05 minutes'),
+       ('9bsv0s4ilem002n1mt10', null, '9bsv0s65sclg02m57a2g', '9bsv0s4ilem002n1mt90', 'ISSUE', '7', null, '{9bsv0s65sclg02m57a80, 9bsv0s65sclg02m57a50}', current_timestamp - interval '6 day' - interval '2 hours' - interval '56 minutes'),
+       ('9bsv0s4ilem002n1mt1g', '9bsv0s4ilem002n1mt10', '9bsv0s65sclg02m57a50', '9bsv0s4ilem002n1mt9g', 'PUBLICATION', null, null, '{}', current_timestamp - interval '6 days' - interval '1 hour' - interval '13 minutes'),
+       ('9bsv0s4ilem002n1mt20', null, '9bsv0s65sclg02m57a4g', '9bsv0s4ilem002n1mta0', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a60, 9bsv0s65sclg02m57a6g, 9bsv0s65sclg02m57a70, 9bsv0s65sclg02m57a7g, 9bsv0s65sclg02m57a80, 9bsv0s65sclg02m57a8g, 9bsv0s65sclg02m57a90, 9bsv0s65sclg02m57a9g, 9bsv0s65sclg02m57aa0, 9bsv0s65sclg02m57aag}', current_timestamp - interval '2 days' - interval '7 hour' - interval '41 minutes'),
+       ('9bsv0s4ilem002n1mt2g', '9bsv0s4ilem002n1mt20', '9bsv0s65sclg02m57a6g', '9bsv0s4ilem002n1mtag', 'PUBLICATION', null, null, '{9bsv0s65sclg02m57a4g}', current_timestamp - interval '6 days' + interval '1 hour' - interval '13 minutes'),
+       ('9bsv0s4ilem002n1mt30', '9bsv0s4ilem002n1mt2g', '9bsv0s65sclg02m57a4g', '9bsv0s4ilem002n1mtb0', 'PUBLICATION', null, null, '{}', current_timestamp - interval '6 days' + interval '1 hour' - interval '26 minutes'),
+       ('9bsv0s4ilem002n1mt3g', '9bsv0s4ilem002n1mt20', '9bsv0s65sclg02m57a9g', '9bsv0s4ilem002n1mtbg', 'PUBLICATION', null, null, '{}', current_timestamp - interval '6 days' + interval '5 hour' - interval '49 minutes')
 ;
 `
 
