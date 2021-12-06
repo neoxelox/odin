@@ -142,7 +142,7 @@ func (self *SeedCommand) Execute() error {
 			return ErrGeneric().Wrap(err)
 		}
 
-		if numUsers != 21 {
+		if numUsers != 23 {
 			return ErrGeneric().With("User seed failed")
 		}
 
@@ -151,7 +151,7 @@ func (self *SeedCommand) Execute() error {
 			return ErrGeneric().Wrap(err)
 		}
 
-		if numMemberships != 21 {
+		if numMemberships != 23 {
 			return ErrGeneric().With("Membership seed failed")
 		}
 
