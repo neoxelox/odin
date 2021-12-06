@@ -37,6 +37,7 @@ VALUES ('9bsv0s2l1bfg034l8so0', '+34722560561', 'Susana García', '', 'https://i
        ('9bsv0s2l1bfg034l8t0g', '+34631226695', 'Cesar Sosa', '', 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mzh8fHBlcnNvbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60', current_date, '', false),
        ('9bsv0s2l1bfg034l8t10', '+34618407958', 'Ricardo Romero', '', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NDF8fHBlcnNvbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60', current_date, '', false),
        ('9bsv0s2l1bfg034l8t1g', '+34737106464', 'Álex Aguirre', '', 'https://images.unsplash.com/photo-1598411072028-c4642d98352c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NDR8fHBlcnNvbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60', current_date, '', false)
+       ('9bsv0s7q8b4002uqbcng', '+34637351939', 'Carlos Sansón', 'csansoon@gmail.com', 'https://instagram.fqsa1-1.fna.fbcdn.net/v/t51.2885-19/s150x150/117321109_767972807365243_3420289706782871686_n.jpg?cb=9ad74b5e-c1c39920&_nc_ht=instagram.fqsa1-1.fna.fbcdn.net&_nc_cat=107&_nc_ohc=BQxV4Svq06YAX-cIbEF&edm=ALbqBD0BAAAA&ccb=7-4&oh=ee3c39a254ed2f47dd0176f79ec19364&oe=61B47579&_nc_sid=9a90d6', current_date, '', false)
 ;
 `
 
@@ -62,6 +63,7 @@ VALUES ('9bsv0s65sclg02m57a20', '9bsv0s2l1bfg034l8so0', '9bsv0s5a5rsg02purd40', 
        ('9bsv0s65sclg02m57aag', '9bsv0s2l1bfg034l8t0g', '9bsv0s5a5rsg02purd40', 'Bajo 4ª', 'RESIDENT'),
        ('9bsv0s65sclg02m57ab0', '9bsv0s2l1bfg034l8t10', '9bsv0s5a5rsg02purd40', '1º 3ª', 'RESIDENT'),
        ('9bsv0s65sclg02m57abg', '9bsv0s2l1bfg034l8t1g', '9bsv0s5a5rsg02purd40', '3º 1ª', 'RESIDENT')
+       ('9bsv0s4d412g031f8bq0', '9bsv0s7q8b4002uqbcng', '9bsv0s5a5rsg02purd40', '', 'ADMINISTRATOR')
 ;
 `
 

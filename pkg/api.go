@@ -174,7 +174,7 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 	authCreator := auth.NewCreatorUsecase(configuration, logger)
 	authVerifier := auth.NewVerifierUsecase(configuration, logger, *sessionRepository, *userRepository)
 	authLogger := auth.NewLoggerUsecase(configuration, logger, *database, *otpVerifier, *userCreator,
-		*sessionCreator, *authCreator, *otpRepository, *userRepository, *sessionRepository)
+		*sessionCreator, *authCreator, *otpRepository, *userRepository, *sessionRepository, *invitationCreator)
 
 	/* VIEWS */
 

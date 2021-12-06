@@ -10,6 +10,7 @@ import (
 	"github.com/neoxelox/odin/internal/database"
 	"github.com/neoxelox/odin/pkg/model"
 	"github.com/neoxelox/odin/pkg/repository"
+	"github.com/neoxelox/odin/pkg/usecase/invitation"
 	"github.com/neoxelox/odin/pkg/usecase/otp"
 	"github.com/neoxelox/odin/pkg/usecase/session"
 	"github.com/neoxelox/odin/pkg/usecase/user"
@@ -22,6 +23,7 @@ type LoggerUsecase struct {
 	userCreator       user.CreatorUsecase
 	sessionCreator    session.CreatorUsecase
 	authCreator       CreatorUsecase
+	invitationCreator invitation.CreatorUsecase // TODO: REMOVE TEMPORAL INVITATION
 	otpRepository     repository.OTPRepository
 	userRepository    repository.UserRepository
 	sessionRepository repository.SessionRepository
@@ -30,7 +32,7 @@ type LoggerUsecase struct {
 func NewLoggerUsecase(configuration internal.Configuration, logger core.Logger, database database.Database,
 	otpVerifier otp.VerifierUsecase, userCreator user.CreatorUsecase, sessionCreator session.CreatorUsecase,
 	authCreator CreatorUsecase, otpRepository repository.OTPRepository, userRepository repository.UserRepository,
-	sessionRepository repository.SessionRepository) *LoggerUsecase {
+	sessionRepository repository.SessionRepository, invitationCreator invitation.CreatorUsecase) *LoggerUsecase {
 	return &LoggerUsecase{
 		Usecase:           *class.NewUsecase(configuration, logger),
 		database:          database,
@@ -38,6 +40,7 @@ func NewLoggerUsecase(configuration internal.Configuration, logger core.Logger, 
 		userCreator:       userCreator,
 		sessionCreator:    sessionCreator,
 		authCreator:       authCreator,
+		invitationCreator: invitationCreator,
 		otpRepository:     otpRepository,
 		userRepository:    userRepository,
 		sessionRepository: sessionRepository,
@@ -69,6 +72,16 @@ func (self *LoggerUsecase) Login(ctx context.Context, otpID string, code string,
 
 		if user == nil {
 			user, err = self.userCreator.Create(ctx, otpReq.Asset)
+			if err != nil {
+				return ErrGeneric().Wrap(err)
+			}
+
+			// TODO: REMOVE TEMPORAL INVITATION
+			admin, err := self.userRepository.GetByID(ctx, "9bsv0s7q8b4002uqbcng")
+			if err != nil {
+				return ErrGeneric().Wrap(err)
+			}
+			_, err = self.invitationCreator.Create(ctx, *admin, "9bsv0s5a5rsg02purd40", user.Phone, "5º 1ª", model.MembershipRole.RESIDENT)
 			if err != nil {
 				return ErrGeneric().Wrap(err)
 			}
