@@ -91,7 +91,7 @@ func (self *GetterUsecase) GetHistory(ctx context.Context, requester model.User,
 	}
 
 	sort.Slice(history, func(i, j int) bool {
-		return history[i].CreatedAt.Before(history[j].CreatedAt)
+		return history[i].CreatedAt.After(history[j].CreatedAt)
 	})
 
 	return history, nil
@@ -128,7 +128,7 @@ func (self *GetterUsecase) GetThread(ctx context.Context, requester model.User, 
 	}
 
 	sort.Slice(posts, func(i, j int) bool {
-		return posts[i].CreatedAt.Before(posts[j].CreatedAt)
+		return posts[i].CreatedAt.After(posts[j].CreatedAt)
 	})
 
 	utility.EqualSort(posts, histories, func(i, j int) bool {

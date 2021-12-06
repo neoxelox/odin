@@ -84,7 +84,7 @@ func (self *GetterUsecase) List(ctx context.Context, user model.User) ([]model.C
 	}
 
 	sort.Slice(memberships, func(i, j int) bool {
-		return memberships[i].CreatedAt.Before(memberships[j].CreatedAt)
+		return memberships[i].CreatedAt.After(memberships[j].CreatedAt)
 	})
 
 	utility.EqualSort(memberships, communities, func(i, j int) bool {

@@ -51,7 +51,7 @@ func (self *GetterUsecase) List(ctx context.Context, user model.User) ([]model.I
 	}
 
 	sort.Slice(filteredInvitations, func(i, j int) bool {
-		return filteredInvitations[i].CreatedAt.Before(filteredInvitations[j].CreatedAt)
+		return filteredInvitations[i].CreatedAt.After(filteredInvitations[j].CreatedAt)
 	})
 
 	return filteredInvitations, nil
