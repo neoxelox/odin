@@ -66,6 +66,7 @@ func (self *PostView) GetPost(ctx echo.Context) error {
 				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
+					UpdatorID:  resHistory.UpdatorID,
 					Message:    resHistory.Message,
 					Categories: resHistory.Categories,
 					State:      resHistory.State,
@@ -100,6 +101,7 @@ func (self *PostView) GetPostHistory(ctx echo.Context) error {
 		case err == nil:
 			for _, resHistory := range resHistories {
 				response.History = append(response.History, payload.PostHistory{
+					UpdatorID:  resHistory.UpdatorID,
 					Message:    resHistory.Message,
 					Categories: resHistory.Categories,
 					State:      resHistory.State,
@@ -145,6 +147,7 @@ func (self *PostView) GetPostThread(ctx echo.Context) error {
 					Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPosts[i].ID)), // TODO: Refactorize this sh*t
 					CreatedAt:    resPosts[i].CreatedAt,
 					PostHistory: payload.PostHistory{
+						UpdatorID:  resHistories[i].UpdatorID,
 						Message:    resHistories[i].Message,
 						Categories: resHistories[i].Categories,
 						State:      resHistories[i].State,
@@ -190,6 +193,7 @@ func (self *PostView) GetPostList(ctx echo.Context) error {
 					Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPosts[i].ID)), // TODO: Refactorize this sh*t
 					CreatedAt:    resPosts[i].CreatedAt,
 					PostHistory: payload.PostHistory{
+						UpdatorID:  resHistories[i].UpdatorID,
 						Message:    resHistories[i].Message,
 						Categories: resHistories[i].Categories,
 						State:      resHistories[i].State,
@@ -237,6 +241,7 @@ func (self *PostView) PostPost(ctx echo.Context) error {
 				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), newPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    newPost.CreatedAt,
 				PostHistory: payload.PostHistory{
+					UpdatorID:  newHistory.UpdatorID,
 					Message:    newHistory.Message,
 					Categories: newHistory.Categories,
 					State:      newHistory.State,
@@ -287,6 +292,7 @@ func (self *PostView) PutPost(ctx echo.Context) error {
 				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), updatedPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    updatedPost.CreatedAt,
 				PostHistory: payload.PostHistory{
+					UpdatorID:  updatedHistory.UpdatorID,
 					Message:    updatedHistory.Message,
 					Categories: updatedHistory.Categories,
 					State:      updatedHistory.State,
@@ -331,6 +337,7 @@ func (self *PostView) PostVotePost(ctx echo.Context) error {
 				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
+					UpdatorID:  resHistory.UpdatorID,
 					Message:    resHistory.Message,
 					Categories: resHistory.Categories,
 					State:      resHistory.State,
@@ -372,6 +379,7 @@ func (self *PostView) PostUnvotePost(ctx echo.Context) error {
 				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
+					UpdatorID:  resHistory.UpdatorID,
 					Message:    resHistory.Message,
 					Categories: resHistory.Categories,
 					State:      resHistory.State,
@@ -413,6 +421,7 @@ func (self *PostView) PostVotePostPoll(ctx echo.Context) error {
 				Subposts:     utility.IgnoreIntError(self.postRepository.GetSubposts(ctx.Request().Context(), resPost.ID)), // TODO: Refactorize this sh*t
 				CreatedAt:    resPost.CreatedAt,
 				PostHistory: payload.PostHistory{
+					UpdatorID:  resHistory.UpdatorID,
 					Message:    resHistory.Message,
 					Categories: resHistory.Categories,
 					State:      resHistory.State,

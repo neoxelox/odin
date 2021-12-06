@@ -145,6 +145,7 @@ func (self *CreatorUsecase) createPublication(ctx context.Context, creator model
 	post.RecipientIDs = recipientIDs
 
 	history.PostID = post.ID
+	history.UpdatorID = creator.ID
 	history.Message = message
 	history.Media = media
 	history.Widgets = model.PostWidgets{
@@ -201,6 +202,7 @@ func (self *CreatorUsecase) createIssue(ctx context.Context, creator model.Membe
 	post.RecipientIDs = recipientIDs
 
 	history.PostID = post.ID
+	history.UpdatorID = creator.ID
 	history.Message = message
 	history.Categories = *categories
 	history.State = state

@@ -24,6 +24,7 @@ type PostWidgets struct {
 }
 
 type PostHistory struct {
+	UpdatorID  string      `json:"updator_id"`
 	Message    string      `json:"message"`
 	Categories []string    `json:"categories"`
 	State      *string     `json:"state"`

@@ -53,7 +53,12 @@ func (self *UpdaterUsecase) Update(ctx context.Context, updator model.User, comm
 		return nil, nil, ErrInvalid()
 	}
 
-	if updatorMembership.ID != post.CreatorID {
+	if updatorMembership.ID != post.CreatorID &&
+		updatorMembership.Role != model.MembershipRole.ADMINISTRATOR &&
+		updatorMembership.Role != model.MembershipRole.PRESIDENT &&
+		updatorMembership.Role != model.MembershipRole.SECRETARY {
+		return nil, nil, community.ErrNotPermission()
+	} else if state != nil {
 		return nil, nil, community.ErrNotPermission()
 	}
 
@@ -64,6 +69,7 @@ func (self *UpdaterUsecase) Update(ctx context.Context, updator model.User, comm
 	updatedHistory := history.Copy()
 	updatedHistory.ID = xid.New().String()
 	updatedHistory.CreatedAt = time.Now()
+	updatedHistory.UpdatorID = updatorMembership.ID
 
 	if message != nil {
 		updatedHistory.Message = *message

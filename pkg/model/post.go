@@ -92,6 +92,7 @@ type PostHistory struct {
 	class.Model
 	ID         string      `db:"id"`
 	PostID     string      `db:"post_id"`
+	UpdatorID  string      `db:"updator_id"`
 	Message    string      `db:"message"`
 	Categories []string    `db:"categories"`
 	State      *string     `db:"state"`
@@ -120,6 +121,7 @@ func (self *PostHistory) Copy() *PostHistory {
 	return &PostHistory{
 		ID:         *utility.CopyString(&self.ID),
 		PostID:     *utility.CopyString(&self.PostID),
+		UpdatorID:  *utility.CopyString(&self.UpdatorID),
 		Message:    *utility.CopyString(&self.Message),
 		Categories: *utility.CopyStringSlice(&self.Categories),
 		State:      utility.CopyString(self.State),

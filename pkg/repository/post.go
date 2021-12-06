@@ -49,12 +49,12 @@ func (self *PostRepository) CreateHistory(ctx context.Context, history model.Pos
 	var h model.PostHistory
 
 	query := fmt.Sprintf(`INSERT INTO "%s"
-						  ("id", "post_id", "message", "categories", "state", "media", "widgets", "created_at")
-						  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+						  ("id", "post_id", "updator_id", "message", "categories", "state", "media", "widgets", "created_at")
+						  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 						  RETURNING *;`, POST_HISTORY_TABLE)
 
 	err := self.Database.Query(
-		ctx, query, history.ID, history.PostID, history.Message, history.Categories, history.State, history.Media, history.Widgets, history.CreatedAt).Scan(&h)
+		ctx, query, history.ID, history.PostID, history.UpdatorID, history.Message, history.Categories, history.State, history.Media, history.Widgets, history.CreatedAt).Scan(&h)
 	if err != nil {
 		return nil, ErrPostGeneric().Wrap(err)
 	}
