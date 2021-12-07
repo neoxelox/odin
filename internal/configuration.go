@@ -80,7 +80,7 @@ func NewConfiguration(override *Configuration) *Configuration {
 		CacheMinConns: 1,
 		CacheMaxConns: 10 * runtime.GOMAXPROCS(-1),
 
-		AppHost:    utility.GetEnvAsString("ODIN_HOST", "localhost"),
+		AppHost:    utility.GetEnvAsString("ODIN_HOST", "localhost:1111"),
 		AppPort:    utility.GetEnvAsInt("ODIN_PORT", 1111),
 		AppRelease: utility.GetEnvAsString("ODIN_RELEASE", "fake"),
 		AppOrigins: utility.GetEnvAsSlice("ODIN_ORIGINS", []string{"http://localhost:1111"}),

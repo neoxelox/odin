@@ -44,10 +44,9 @@ type API struct {
 func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, error) {
 	ctx := context.Background()
 
-	apiHost := fmt.Sprintf("%s:%d", configuration.AppHost, configuration.AppPort)
-	apiOrigin := fmt.Sprintf("http://%s", apiHost)
+	apiOrigin := fmt.Sprintf("http://%s", configuration.AppHost)
 	if configuration.Environment == internal.Environment.PRODUCTION {
-		apiOrigin = fmt.Sprintf("https://%s", apiHost)
+		apiOrigin = fmt.Sprintf("https://%s", configuration.AppHost)
 	}
 	apiOrigins := strset.New(append([]string{apiOrigin}, configuration.AppOrigins...)...).List()
 
@@ -71,11 +70,11 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	server := server.New(configuration, logger, *serializer, *validator, *renderer, *binder, *errorHandler)
 
-	api := server.Host(apiHost)
+	api := server.Host(configuration.AppHost)
 
 	/* MIDDLEWARES */
 
-	httpsRedirectMiddleware := echoMiddleware.HTTPSRedirect()
+	// httpsRedirectMiddleware := echoMiddleware.HTTPSRedirect()
 	removeTrailingSlashMiddleware := echoMiddleware.RemoveTrailingSlash()
 	loggerMiddleware := internalMiddleware.NewLoggerMiddleware(configuration, logger).Handle
 	recoverMiddleware := echoMiddleware.Recover()
@@ -192,9 +191,9 @@ func NewAPI(configuration internal.Configuration, logger core.Logger) (*API, err
 
 	/* ROUTES */
 
-	if configuration.Environment == internal.Environment.PRODUCTION {
-		server.Use(httpsRedirectMiddleware)
-	}
+	// if configuration.Environment == internal.Environment.PRODUCTION {
+	// 	server.Use(httpsRedirectMiddleware)
+	// }
 	server.Use(removeTrailingSlashMiddleware)
 
 	api.Use(loggerMiddleware)
